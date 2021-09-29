@@ -1,19 +1,22 @@
-#all:
-#	gcc -Wall -O0 -mcpu=arm7tdmi-s -mapcs -mthumb-interwork -o flash.o flash.c -nostartfiles -nodefaultlibs -nostdlib -Wl,-e,main
-#	objcopy -Obinary -j.text flash.o flash.bin
-#	objdump --disassemble-all -bbinary -marm7tdmi flash.bin > flash.asm
-#
+WARNINGS = -W -Wall
+OPTIMIZE = -O3
+CFLAGS = -mcpu=arm7tdmi -msoft-float -mapcs $(WARNINGS) $(OPTIMIZE)
+ASFLAGS = --warn -mfpu=softfpa -mcpu=arm7tdmi -mapcs-32
+LDFLAGS = --gc-sections $(OPTIMIZE)
 
-CC=`which arm-elf-gcc`
-AS=`which arm-elf-as`
-LD=`which arm-elf-ld`
-OBJCOPY=`which arm-elf-objcopy`
+CROSS_COMPILE = arm-none-eabi-
+CC = $(CROSS_COMPILE)gcc
+AS = $(CROSS_COMPILE)as
+LD = $(CROSS_COMPILE)ld
+OBJCOPY = $(CROSS_COMPILE)objcopy
 
-all:
-	$(CC) -W -Wall -O3 -msoft-float -mcpu=arm7tdmi -mapcs -c -o flash.o flash.c
-	$(AS) --warn -mfpu=softfpa -mcpu=arm7tdmi -mapcs-32 -o crt0.o crt0.s
-	$(LD) -O3 --gc-sections crt0.o flash.o -o flash.elf
-	$(OBJCOPY) -O binary flash.elf flash.bin
+all: flash.bin
+
+flash.elf: crt0.o flash.o
+	$(LD) $(LDFLAGS) $^ -o $@
+
+%.bin: %.elf
+	$(OBJCOPY) -O binary $< $@
 
 clean:
 	rm -f flash.o crt0.o flash.elf flash.bin

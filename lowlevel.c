@@ -96,6 +96,9 @@ nxt_open(nxt_t *nxt, int interface)
 
   nxt->hdl = usb_open(nxt->dev);
 
+  // Try to detach driver, but ignore errors, only implemented on Linux
+  usb_detach_kernel_driver_np(nxt->hdl, interface);
+
   ret = usb_set_configuration(nxt->hdl, 1);
   if (ret < 0)
     {

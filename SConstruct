@@ -30,13 +30,6 @@ if not env.GetOption('clean'):
         Exit(1)
     env = conf.Finish()
 
-    # Detect the system's endianness
-    orders = {
-        'big': '_NXT_BIG_ENDIAN',
-        'little': '_NXT_LITTLE_ENDIAN',
-        }
-    env.Append(CCFLAGS = '-D%s' % orders[byteorder])
-
     # Set debugging or optimization flags
     if env['debug']:
         env.Append(CCFLAGS = ['-g', '-ggdb', '-O0'])

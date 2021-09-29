@@ -18,8 +18,7 @@ intelligent brick at a relatively low level. It currently does:
 
 LibNXT is targetted at the platforms that the official Lego Minstorms
 NXT software overlooks. Specifically, it will work on any
-POSIX-compliant operating system where libusb 0.1
-(http://libusb.sf.net/) is supported.
+POSIX-compliant operating system where libusb 0.1 is supported.
 
 The design of LibNXT is layered, meaning you can plug into it at any
 level of complexity or abstraction you desire, from the lowest level
@@ -33,7 +32,7 @@ hints, its purpose is to take a NXT firmware image file and flash it
 to a connected NXT device.
 
 `fwexec` is another cool utility, originally written by the folks of
-the Lejos project (http://lejos.sourceforge.net/). It takes a
+the Lejos project (https://lejos.sourceforge.io/). It takes a
 specially compiled firmware image, uploads it to the NXT's RAM, and
 executes it directly from there. While this firmware will only last
 until the brick is powered down, it is a great tool for testing
@@ -86,22 +85,27 @@ library.
 How?
 ====
 
-To compile all of this you'll need a copy of libusb 0.1 on your
-system, as well as the scons project manager.
+To compile all of this you'll need a copy of libusb 0.1 on your system,
+as well as the Meson build system.
 
- - Libusb 0.1: http://libusb.sf.net/
- - Scons: http://www.scons.org/
+ - Libusb 0.1: https://libusb.info/
+ - Meson: https://mesonbuild.com/
 
-When you have all that, just run 'scons' in the libnxt directory, and
-compilation should follow. Once you're done, you can try fwflash out
-by resetting your NXT (see your user manual for details on this) and
-running:
+When you have all that, build with:
 
-./fwflash nxtos.bin
+    meson build
+    cd build
+    meson compile
 
-nxtos.bin is the official Lego Mindstorms NXT firmware. You can find
-this on your current installation of the Mindstorms software, or on
-LEGO's website.
+Once you're done, you can try fwflash out by resetting your NXT (see
+your user manual for details on this) and running:
+
+    ./fwflash firmware.bin
+
+firmware.bin is a Lego Mindstorms NXT firmware. You can find this on
+your current installation of the Mindstorms software, on LEGO's website,
+on the NXT Improved Firwmare website, or on the Enhanced NBC/NXC
+Firmware website.
 
 If all goes well, fwflash should inform you that it has found the NXT
 on your USB device bus, and that flashing has started. After a few
@@ -113,17 +117,3 @@ If it doesn't, well it's either a problem with your USB device
 permissions (if fwflash can't find the NXT), or it's a bug (if the brick
 doesn't reboot properly, or if some weird error is reported by fwflash
 and it bombs out.
-
-The release tarball comes with a 'flash.bin'. This file is the
-compiled version of the embedded flash driver, which is uploaded to
-the NXT's RAM and required to write data into flash memory.
-
-If you do not have a release tarball, or accidentally deleted your
-copy of flash.bin, there are several options. If you have an ARM7
-cross-compiler toolchain, you can simply type 'make' in the
-'flash_write' subdirectory to rebuild the flash driver.
-
-If you don't have a suitable cross-compiler, you can just run 'scons'
-as usual. The build system will see that the flash driver is missing,
-and offer to download a binary copy from the LibNXT website and use
-that.

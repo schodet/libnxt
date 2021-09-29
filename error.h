@@ -36,7 +36,7 @@ typedef enum
   NXT_INVALID_FIRMWARE = 9,
 } nxt_error_t;
 
-const char const *nxt_str_error(nxt_error_t err);
+const char *nxt_str_error(nxt_error_t err);
 
 #define NXT_ERR(expr)                   \
   do {                                  \

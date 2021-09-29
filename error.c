@@ -21,7 +21,7 @@
 
 #include "error.h"
 
-static const char const *err_str[] = {
+static const char * const err_str[] = {
   "Success",
   "NXT not found on USB bus",
   "Error trying to configure the NXT USB link",
@@ -34,7 +34,7 @@ static const char const *err_str[] = {
   "Invalid firmware image",
 };
 
-const char const *
+const char *
 nxt_str_error(nxt_error_t err)
 {
   return err_str[err];

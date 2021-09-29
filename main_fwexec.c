@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
       printf("Syntax: %s <Firmware image to write> [load address]\n"
              "\n"
              "Example: %s beep.bin\n"
-             "         %s beep.bin 0x1234", argv[0], argv[0], argv[0]);
+             "         %s beep.bin 0x1234\n", argv[0], argv[0], argv[0]);
       exit(1);
     }
   if (argc == 3) {

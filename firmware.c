@@ -141,8 +141,6 @@ nxt_firmware_flash(nxt_t *nxt, char *fw_path)
 
           return ret == -1 ? NXT_FILE_ERROR : NXT_OK;
         }
-
-      NXT_ERR(nxt_flash_block(nxt, i, buf));
     }
 
   close(fd);

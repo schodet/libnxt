@@ -19,19 +19,18 @@
  * USA
  */
 
+#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include <unistd.h>
-#include <errno.h>
 #include <usb.h>
 
 #include "lowlevel.h"
 
-
-const struct {
+const struct
+{
   int vendor_id;
   int product_id;
 } nxt_usb_ids[N_FIRMWARES] = {
@@ -40,15 +39,16 @@ const struct {
   { 0x0694, 0xFF00 }  /* NXTOS  */
 };
 
-struct nxt_t {
+struct nxt_t
+{
   struct usb_device *dev;
   struct usb_dev_handle *hdl;
   nxt_firmware firmware;
   int interface;
 };
 
-
-nxt_error_t nxt_init(nxt_t **nxt)
+nxt_error_t
+nxt_init(nxt_t **nxt)
 {
   usb_init();
   *nxt = calloc(1, sizeof(**nxt));
@@ -56,8 +56,8 @@ nxt_error_t nxt_init(nxt_t **nxt)
   return NXT_OK;
 }
 
-
-nxt_error_t nxt_find(nxt_t *nxt)
+nxt_error_t
+nxt_find(nxt_t *nxt)
 {
   struct usb_bus *busses, *bus;
 
@@ -74,7 +74,7 @@ nxt_error_t nxt_find(nxt_t *nxt)
         {
           int i;
 
-          for (i=0; i<N_FIRMWARES; i++)
+          for (i = 0; i < N_FIRMWARES; i++)
             if (dev->descriptor.idVendor == nxt_usb_ids[i].vendor_id &&
                 dev->descriptor.idProduct == nxt_usb_ids[i].product_id)
               {
@@ -87,7 +87,6 @@ nxt_error_t nxt_find(nxt_t *nxt)
 
   return NXT_NOT_PRESENT;
 }
-
 
 nxt_error_t
 nxt_open(nxt_t *nxt, int interface)
@@ -118,7 +117,6 @@ nxt_open(nxt_t *nxt, int interface)
   return NXT_OK;
 }
 
-
 nxt_error_t
 nxt_close(nxt_t *nxt)
 {
@@ -129,13 +127,11 @@ nxt_close(nxt_t *nxt)
   return NXT_OK;
 }
 
-
 int
 nxt_is_firmware(nxt_t *nxt, nxt_firmware fw)
 {
   return (nxt->firmware == fw);
 }
-
 
 nxt_error_t
 nxt_send_buf(nxt_t *nxt, char *buf, int len)
@@ -147,13 +143,11 @@ nxt_send_buf(nxt_t *nxt, char *buf, int len)
   return NXT_OK;
 }
 
-
 nxt_error_t
 nxt_send_str(nxt_t *nxt, char *str)
 {
   return nxt_send_buf(nxt, str, strlen(str));
 }
-
 
 nxt_error_t
 nxt_recv_buf(nxt_t *nxt, char *buf, int len)

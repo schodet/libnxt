@@ -21,13 +21,13 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#include "samba.h"
 #include "error.h"
 #include "lowlevel.h"
-#include "samba.h"
 
 static nxt_error_t
-nxt_format_command2(char *buf, char cmd,
-                    nxt_addr_t addr, nxt_word_t word)
+nxt_format_command2(char *buf, char cmd, nxt_addr_t addr, nxt_word_t word)
 {
   snprintf(buf, 20, "%c%08X,%08X#", cmd, addr, word);
 
@@ -42,18 +42,16 @@ nxt_format_command(char *buf, char cmd, nxt_addr_t addr)
   return NXT_OK;
 }
 
-
 static nxt_error_t
 nxt_write_common(nxt_t *nxt, char type, nxt_addr_t addr, nxt_word_t w)
 {
-  char buf[21] = {0};
+  char buf[21] = { 0 };
 
   NXT_ERR(nxt_format_command2(buf, type, addr, w));
   NXT_ERR(nxt_send_str(nxt, buf));
 
   return NXT_OK;
 }
-
 
 nxt_error_t
 nxt_handshake(nxt_t *nxt)
@@ -71,13 +69,11 @@ nxt_handshake(nxt_t *nxt)
   return NXT_OK;
 }
 
-
 nxt_error_t
 nxt_write_byte(nxt_t *nxt, nxt_addr_t addr, nxt_byte_t b)
 {
   return nxt_write_common(nxt, 'O', addr, b);
 }
-
 
 nxt_error_t
 nxt_write_hword(nxt_t *nxt, nxt_addr_t addr, nxt_hword_t hw)
@@ -85,19 +81,17 @@ nxt_write_hword(nxt_t *nxt, nxt_addr_t addr, nxt_hword_t hw)
   return nxt_write_common(nxt, 'H', addr, hw);
 }
 
-
 nxt_error_t
 nxt_write_word(nxt_t *nxt, nxt_addr_t addr, nxt_word_t w)
 {
   return nxt_write_common(nxt, 'W', addr, w);
 }
 
-
 static nxt_error_t
-nxt_read_common(nxt_t *nxt, char cmd, int len,
-                nxt_addr_t addr, nxt_word_t *word)
+nxt_read_common(nxt_t *nxt, char cmd, int len, nxt_addr_t addr,
+                nxt_word_t *word)
 {
-  char buf[20] = {0};
+  char buf[20] = { 0 };
 
   NXT_ERR(nxt_format_command2(buf, cmd, addr, len));
   NXT_ERR(nxt_send_str(nxt, buf));
@@ -108,7 +102,6 @@ nxt_read_common(nxt_t *nxt, char cmd, int len,
   return NXT_OK;
 }
 
-
 nxt_error_t
 nxt_read_byte(nxt_t *nxt, nxt_addr_t addr, nxt_byte_t *b)
 {
@@ -118,7 +111,6 @@ nxt_read_byte(nxt_t *nxt, nxt_addr_t addr, nxt_byte_t *b)
 
   return NXT_OK;
 }
-
 
 nxt_error_t
 nxt_read_hword(nxt_t *nxt, nxt_addr_t addr, nxt_hword_t *hw)
@@ -131,13 +123,11 @@ nxt_read_hword(nxt_t *nxt, nxt_addr_t addr, nxt_hword_t *hw)
   return NXT_OK;
 }
 
-
 nxt_error_t
 nxt_read_word(nxt_t *nxt, nxt_addr_t addr, nxt_word_t *w)
 {
   return nxt_read_common(nxt, 'w', 4, addr, w);
 }
-
 
 nxt_error_t
 nxt_send_file(nxt_t *nxt, nxt_addr_t addr, char *file, unsigned short len)
@@ -151,7 +141,6 @@ nxt_send_file(nxt_t *nxt, nxt_addr_t addr, char *file, unsigned short len)
   return NXT_OK;
 }
 
-
 nxt_error_t
 nxt_recv_file(nxt_t *nxt, nxt_addr_t addr, char *file, unsigned short len)
 {
@@ -159,10 +148,9 @@ nxt_recv_file(nxt_t *nxt, nxt_addr_t addr, char *file, unsigned short len)
 
   NXT_ERR(nxt_format_command2(buf, 'R', addr, len));
   NXT_ERR(nxt_send_str(nxt, buf));
-  NXT_ERR(nxt_recv_buf(nxt, file, len+1));
+  NXT_ERR(nxt_recv_buf(nxt, file, len + 1));
   return NXT_OK;
 }
-
 
 nxt_error_t
 nxt_jump(nxt_t *nxt, nxt_addr_t addr)
@@ -174,7 +162,6 @@ nxt_jump(nxt_t *nxt, nxt_addr_t addr)
   NXT_ERR(nxt_send_str(nxt, buf));
   return NXT_OK;
 }
-
 
 nxt_error_t
 nxt_samba_version(nxt_t *nxt, char *version)

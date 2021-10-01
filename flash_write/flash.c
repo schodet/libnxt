@@ -31,16 +31,19 @@
 #define OFFSET_PAGE_NUM ((USER_PAGE_NUM & 0x000003FF) << 8)
 #define FLASH_CMD_WRITE (0x5A000001 + OFFSET_PAGE_NUM)
 
-void do_flash_write(void)
+void
+do_flash_write(void)
 {
   unsigned long i;
 
-  while (!(FLASH_STATUS_REG & 0x1));
+  while (!(FLASH_STATUS_REG & 0x1))
+    ;
 
   for (i = 0; i < 64; i++)
-    FLASH_BASE[(USER_PAGE_NUM*64)+i] = USER_PAGE[i];
+    FLASH_BASE[(USER_PAGE_NUM * 64) + i] = USER_PAGE[i];
 
   FLASH_CMD_REG = FLASH_CMD_WRITE;
 
-  while (!(FLASH_STATUS_REG & 0x1));
+  while (!(FLASH_STATUS_REG & 0x1))
+    ;
 }

@@ -19,20 +19,20 @@
  * USA
  */
 
-#include <stdio.h>
 #include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "error.h"
+#include "firmware.h"
+#include "flash.h"
+#include "flash_routine.h"
 #include "lowlevel.h"
 #include "samba.h"
-#include "flash.h"
-#include "firmware.h"
-#include "flash_routine.h"
 
 static nxt_error_t
 nxt_flash_prepare(nxt_t *nxt)
@@ -49,7 +49,6 @@ nxt_flash_prepare(nxt_t *nxt)
   return NXT_OK;
 }
 
-
 static nxt_error_t
 nxt_flash_block(nxt_t *nxt, nxt_word_t block_num, char *buf)
 {
@@ -65,13 +64,11 @@ nxt_flash_block(nxt_t *nxt, nxt_word_t block_num, char *buf)
   return NXT_OK;
 }
 
-
 static nxt_error_t
 nxt_flash_finish(nxt_t *nxt)
 {
   return nxt_flash_wait_ready(nxt);
 }
-
 
 static nxt_error_t
 nxt_firmware_validate_fd(int fd)
@@ -81,12 +78,11 @@ nxt_firmware_validate_fd(int fd)
   if (fstat(fd, &s) < 0)
     return NXT_FILE_ERROR;
 
-  if (s.st_size > 256*1024)
+  if (s.st_size > 256 * 1024)
     return NXT_INVALID_FIRMWARE;
 
   return NXT_OK;
 }
-
 
 nxt_error_t
 nxt_firmware_validate(char *fw_path)
@@ -103,7 +99,6 @@ nxt_firmware_validate(char *fw_path)
 
   return err;
 }
-
 
 nxt_error_t
 nxt_firmware_flash(nxt_t *nxt, char *fw_path)
@@ -123,7 +118,7 @@ nxt_firmware_flash(nxt_t *nxt, char *fw_path)
 
   NXT_ERR(nxt_flash_prepare(nxt));
 
-  for (i = 0; i < 1024; i++) //256*1024; i += 256)
+  for (i = 0; i < 1024; i++)
     {
       char buf[256];
       int ret;

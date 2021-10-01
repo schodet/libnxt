@@ -19,17 +19,17 @@
  * USA
  */
 
-#include <stdio.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "error.h"
+#include "flash.h"
 #include "lowlevel.h"
 #include "samba.h"
-#include "flash.h"
 
 enum nxt_flash_commands
 {
@@ -49,14 +49,14 @@ nxt_flash_wait_ready(nxt_t *nxt)
       /* Bit 0 is the FRDY field. Set to 1 if the flash controller is
        * ready to run a new command.
        */
-    } while (!(flash_status & 0x1));
+    }
+  while (!(flash_status & 0x1));
 
   return NXT_OK;
 }
 
 static nxt_error_t
-nxt_flash_alter_lock(nxt_t *nxt, int region_num,
-                     enum nxt_flash_commands cmd)
+nxt_flash_alter_lock(nxt_t *nxt, int region_num, enum nxt_flash_commands cmd)
 {
   nxt_word_t w = 0x5A000000 | ((64 * region_num) << 8);
   w += cmd;
@@ -74,20 +74,17 @@ nxt_flash_alter_lock(nxt_t *nxt, int region_num,
   return NXT_OK;
 }
 
-
 nxt_error_t
 nxt_flash_lock_region(nxt_t *nxt, int region_num)
 {
   return nxt_flash_alter_lock(nxt, region_num, FLASH_CMD_LOCK);
 }
 
-
 nxt_error_t
 nxt_flash_unlock_region(nxt_t *nxt, int region_num)
 {
   return nxt_flash_alter_lock(nxt, region_num, FLASH_CMD_UNLOCK);
 }
-
 
 nxt_error_t
 nxt_flash_lock_all_regions(nxt_t *nxt)
@@ -99,7 +96,6 @@ nxt_flash_lock_all_regions(nxt_t *nxt)
 
   return NXT_OK;
 }
-
 
 nxt_error_t
 nxt_flash_unlock_all_regions(nxt_t *nxt)

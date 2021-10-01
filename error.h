@@ -38,11 +38,13 @@ typedef enum
 
 const char *nxt_str_error(nxt_error_t err);
 
-#define NXT_ERR(expr)                   \
-  do {                                  \
-    nxt_error_t nxt__err_temp = (expr); \
-    if (nxt__err_temp)                  \
-      return nxt__err_temp;             \
-  } while(0)
+#define NXT_ERR(expr)                     \
+  do                                      \
+    {                                     \
+      nxt_error_t nxt__err_temp = (expr); \
+      if (nxt__err_temp)                  \
+        return nxt__err_temp;             \
+    }                                     \
+  while (0)
 
 #endif /* __ERROR_H__ */

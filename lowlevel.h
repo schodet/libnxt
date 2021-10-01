@@ -23,14 +23,16 @@
 #define __LOWLEVEL_H__
 
 #include <usb.h>
+
 #include "error.h"
 
 struct nxt_t;
 typedef struct nxt_t nxt_t;
 
-typedef enum {
-  SAMBA = 0,   /* SAM7 Boot Assistant    */
-  LEGO, /* Official LEGO firmware */
+typedef enum
+{
+  SAMBA = 0, /* SAM7 Boot Assistant    */
+  LEGO,      /* Official LEGO firmware */
   NXTOS,
   N_FIRMWARES,
 } nxt_firmware;

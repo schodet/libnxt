@@ -23,6 +23,7 @@
 #define __SAMBA_H__
 
 #include <stdint.h>
+
 #include "error.h"
 #include "lowlevel.h"
 
@@ -43,10 +44,10 @@ nxt_error_t nxt_read_byte(nxt_t *nxt, nxt_addr_t addr, nxt_byte_t *b);
 nxt_error_t nxt_read_hword(nxt_t *nxt, nxt_addr_t addr, nxt_hword_t *hw);
 nxt_error_t nxt_read_word(nxt_t *nxt, nxt_addr_t addr, nxt_word_t *w);
 
-nxt_error_t nxt_send_file(nxt_t *nxt, nxt_addr_t addr,
-                          char *file, unsigned short len);
-nxt_error_t nxt_recv_file(nxt_t *nxt, nxt_addr_t addr,
-                          char *file, unsigned short len);
+nxt_error_t nxt_send_file(nxt_t *nxt, nxt_addr_t addr, char *file,
+                          unsigned short len);
+nxt_error_t nxt_recv_file(nxt_t *nxt, nxt_addr_t addr, char *file,
+                          unsigned short len);
 
 nxt_error_t nxt_jump(nxt_t *nxt, nxt_addr_t addr);
 

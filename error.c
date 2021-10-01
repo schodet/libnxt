@@ -21,7 +21,7 @@
 
 #include "error.h"
 
-static const char * const err_str[] = {
+static const char *const err_str[] = {
   "Success",
   "NXT not found on USB bus",
   "Error trying to configure the NXT USB link",

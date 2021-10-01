@@ -1,0 +1,4 @@
+AlignEscapedNewlines: Left
+AlwaysBreakAfterReturnType: AllDefinitions
+BreakBeforeBraces: GNU
+Cpp11BracedListStyle: false

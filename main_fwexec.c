@@ -24,18 +24,21 @@
 #include <stdlib.h>
 
 #include "error.h"
+#include "firmware.h"
 #include "lowlevel.h"
 #include "samba.h"
-#include "firmware.h"
 
-#define NXT_HANDLE_ERR(expr, nxt, msg)     \
-  do {                                     \
-    nxt_error_t nxt__err_temp = (expr);    \
-    if (nxt__err_temp)                     \
-      handle_error(nxt, msg, nxt__err_temp);  \
-  } while(0)
+#define NXT_HANDLE_ERR(expr, nxt, msg)         \
+  do                                           \
+    {                                          \
+      nxt_error_t nxt__err_temp = (expr);      \
+      if (nxt__err_temp)                       \
+        handle_error(nxt, msg, nxt__err_temp); \
+    }                                          \
+  while (0)
 
-static int handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
+static int
+handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
 {
   printf("%s: %s\n", msg, nxt_str_error(err));
   if (nxt != NULL)
@@ -43,24 +46,26 @@ static int handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
   exit(err);
 }
 
-void get_firmware(char **firmware, int *len, char *filename)
+void
+get_firmware(char **firmware, int *len, char *filename)
 {
   FILE *f;
 
   f = fopen(filename, "rb");
-  if (f == NULL) NXT_HANDLE_ERR(NXT_FILE_ERROR, NULL, "Error opening file");
+  if (f == NULL)
+    NXT_HANDLE_ERR(NXT_FILE_ERROR, NULL, "Error opening file");
 
   fseek(f, 0, SEEK_END);
   *len = ftell(f);
   rewind(f);
 
-  if (*len > 56*1024)
+  if (*len > 56 * 1024)
     NXT_HANDLE_ERR(NXT_INVALID_FIRMWARE, NULL,
                    "Firmware image is too big to fit in RAM.");
 
   *firmware = malloc(*len);
-  if (*firmware == NULL) NXT_HANDLE_ERR(NXT_FILE_ERROR, NULL,
-                                        "Error allocating memory");
+  if (*firmware == NULL)
+    NXT_HANDLE_ERR(NXT_FILE_ERROR, NULL, "Error allocating memory");
 
   if (fread(*firmware, 1, *len, f) != *len)
     NXT_HANDLE_ERR(NXT_FILE_ERROR, NULL, "Error reading file");
@@ -70,7 +75,8 @@ void get_firmware(char **firmware, int *len, char *filename)
   fclose(f);
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
   nxt_t *nxt;
   nxt_error_t err;
@@ -82,27 +88,25 @@ int main(int argc, char *argv[])
   if (argc < 2 || argc > 4)
     {
       printf("Syntax: %s <Firmware image to write> [load address] "
-                "[jump address]\n"
+             "[jump address]\n"
              "\n"
              "Example: %s beep.bin\n"
-             "         %s beep.bin 0x202000\n", argv[0], argv[0], argv[0]);
+             "         %s beep.bin 0x202000\n",
+             argv[0], argv[0], argv[0]);
       exit(1);
     }
-  if (argc >= 3) {
+  if (argc >= 3)
     load_addr = strtol(argv[2], NULL, 16);
-  } else {
+  else
     load_addr = 0x202000;
-  }
-  if (argc == 4) {
+  if (argc == 4)
     jump_addr = strtol(argv[3], NULL, 16);
-  } else {
+  else
     jump_addr = load_addr;
-  }
 
   get_firmware(&firmware, &firmware_len, argv[1]);
 
-  NXT_HANDLE_ERR(nxt_init(&nxt), NULL,
-                 "Error during library initialization");
+  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
 
   err = nxt_find(nxt);
   if (err)
@@ -121,7 +125,8 @@ int main(int argc, char *argv[])
       exit(2);
     }
 
-  NXT_HANDLE_ERR(nxt_open(nxt, NXT_SAMBA_INTERFACE), NULL, "Error while connecting to NXT");
+  NXT_HANDLE_ERR(nxt_open(nxt, NXT_SAMBA_INTERFACE), NULL,
+                 "Error while connecting to NXT");
   NXT_HANDLE_ERR(nxt_handshake(nxt), NULL, "Error during initial handshake");
 
   printf("NXT device in reset mode located and opened.\n"
@@ -132,11 +137,9 @@ int main(int argc, char *argv[])
                  "Error Sending file");
 
   printf("Firmware uploaded, executing...\n");
-  NXT_HANDLE_ERR(nxt_jump(nxt, jump_addr), nxt,
-                 "Error jumping to C program");
+  NXT_HANDLE_ERR(nxt_jump(nxt, jump_addr), nxt, "Error jumping to C program");
 
-  NXT_HANDLE_ERR(nxt_close(nxt), NULL,
-                 "Error while closing connection to NXT");
+  NXT_HANDLE_ERR(nxt_close(nxt), NULL, "Error while closing connection to NXT");
 
   printf("Firmware started.\n");
 

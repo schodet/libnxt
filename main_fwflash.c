@@ -23,18 +23,21 @@
 #include <stdlib.h>
 
 #include "error.h"
+#include "firmware.h"
 #include "lowlevel.h"
 #include "samba.h"
-#include "firmware.h"
 
-#define NXT_HANDLE_ERR(expr, nxt, msg)     \
-  do {                                     \
-    nxt_error_t nxt__err_temp = (expr);    \
-    if (nxt__err_temp)                     \
-      return handle_error(nxt, msg, nxt__err_temp);  \
-  } while(0)
+#define NXT_HANDLE_ERR(expr, nxt, msg)                \
+  do                                                  \
+    {                                                 \
+      nxt_error_t nxt__err_temp = (expr);             \
+      if (nxt__err_temp)                              \
+        return handle_error(nxt, msg, nxt__err_temp); \
+    }                                                 \
+  while (0)
 
-static int handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
+static int
+handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
 {
   printf("%s: %s\n", msg, nxt_str_error(err));
   if (nxt != NULL)
@@ -42,7 +45,8 @@ static int handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
   exit(err);
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
   nxt_t *nxt;
   nxt_error_t err;
@@ -52,19 +56,18 @@ int main(int argc, char *argv[])
     {
       printf("Syntax: %s <firmware image to write>\n"
              "\n"
-             "Example: %s nxtos.bin\n", argv[0], argv[0]);
+             "Example: %s nxtos.bin\n",
+             argv[0], argv[0]);
       exit(1);
     }
 
   fw_file = argv[1];
 
   printf("Checking firmware... ");
-  NXT_HANDLE_ERR(nxt_firmware_validate(fw_file), NULL,
-                 "Error");
+  NXT_HANDLE_ERR(nxt_firmware_validate(fw_file), NULL, "Error");
   printf("OK.\n");
 
-  NXT_HANDLE_ERR(nxt_init(&nxt), NULL,
-                 "Error during library initialization");
+  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
 
   err = nxt_find(nxt);
   if (err)
@@ -83,7 +86,8 @@ int main(int argc, char *argv[])
       exit(2);
     }
 
-  NXT_HANDLE_ERR(nxt_open(nxt, NXT_SAMBA_INTERFACE), NULL, "Error while connecting to NXT");
+  NXT_HANDLE_ERR(nxt_open(nxt, NXT_SAMBA_INTERFACE), NULL,
+                 "Error while connecting to NXT");
   NXT_HANDLE_ERR(nxt_handshake(nxt), NULL, "Error during initial handshake");
 
   printf("NXT device in reset mode located and opened.\n"
@@ -92,11 +96,9 @@ int main(int argc, char *argv[])
   NXT_HANDLE_ERR(nxt_firmware_flash(nxt, fw_file), nxt,
                  "Error flashing firmware");
   printf("Firmware flash complete.\n");
-  NXT_HANDLE_ERR(nxt_jump(nxt, 0x00100000), nxt,
-                 "Error booting new firmware");
+  NXT_HANDLE_ERR(nxt_jump(nxt, 0x00100000), nxt, "Error booting new firmware");
   printf("New firmware started!\n");
 
-  NXT_HANDLE_ERR(nxt_close(nxt), NULL,
-                 "Error while closing connection to NXT");
+  NXT_HANDLE_ERR(nxt_close(nxt), NULL, "Error while closing connection to NXT");
   return 0;
 }

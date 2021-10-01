@@ -77,19 +77,26 @@ int main(int argc, char *argv[])
   char *firmware;
   int firmware_len;
   long load_addr;
+  long jump_addr;
 
-  if (argc < 2 || argc > 3)
+  if (argc < 2 || argc > 4)
     {
-      printf("Syntax: %s <Firmware image to write> [load address]\n"
+      printf("Syntax: %s <Firmware image to write> [load address] "
+                "[jump address]\n"
              "\n"
              "Example: %s beep.bin\n"
-             "         %s beep.bin 0x1234\n", argv[0], argv[0], argv[0]);
+             "         %s beep.bin 0x202000\n", argv[0], argv[0], argv[0]);
       exit(1);
     }
-  if (argc == 3) {
+  if (argc >= 3) {
     load_addr = strtol(argv[2], NULL, 16);
   } else {
     load_addr = 0x202000;
+  }
+  if (argc == 4) {
+    jump_addr = strtol(argv[3], NULL, 16);
+  } else {
+    jump_addr = load_addr;
   }
 
   get_firmware(&firmware, &firmware_len, argv[1]);
@@ -125,7 +132,7 @@ int main(int argc, char *argv[])
                  "Error Sending file");
 
   printf("Firmware uploaded, executing...\n");
-  NXT_HANDLE_ERR(nxt_jump(nxt, load_addr), nxt,
+  NXT_HANDLE_ERR(nxt_jump(nxt, jump_addr), nxt,
                  "Error jumping to C program");
 
   NXT_HANDLE_ERR(nxt_close(nxt), NULL,

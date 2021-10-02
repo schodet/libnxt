@@ -22,18 +22,17 @@
 #ifndef __ERROR_H__
 #define __ERROR_H__
 
+#define NXT_ERROR_USB(ret) (NXT_ERROR_USB_MIN - (ret))
+
 typedef enum
 {
   NXT_OK = 0,
   NXT_NOT_PRESENT = 1,
-  NXT_CONFIGURATION_ERROR = 2,
-  NXT_IN_USE = 3,
-  NXT_USB_WRITE_ERROR = 4,
-  NXT_USB_READ_ERROR = 5,
-  NXT_SAMBA_PROTOCOL_ERROR = 6,
-  NXT_HANDSHAKE_FAILED = 7,
-  NXT_FILE_ERROR = 8,
-  NXT_INVALID_FIRMWARE = 9,
+  NXT_HANDSHAKE_FAILED = 2,
+  NXT_FILE_ERROR = 3,
+  NXT_INVALID_FIRMWARE = 4,
+  NXT_ERROR_NO_MEM = 5,
+  NXT_ERROR_USB_MIN = 1000,
 } nxt_error_t;
 
 const char *nxt_str_error(nxt_error_t err);

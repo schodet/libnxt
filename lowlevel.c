@@ -19,13 +19,14 @@
  * USA
  */
 
+#include <assert.h>
 #include <errno.h>
+#include <libusb.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <usb.h>
 
 #include "lowlevel.h"
 
@@ -33,98 +34,135 @@ const struct
 {
   int vendor_id;
   int product_id;
+  int interface;
 } nxt_usb_ids[N_FIRMWARES] = {
-  { 0x03EB, 0x6124 }, /* SAM-BA */
-  { 0x0694, 0x0002 }, /* LEGO   */
-  { 0x0694, 0xFF00 }  /* NXTOS  */
+  { 0x03EB, 0x6124, 1 }, /* SAM-BA */
+  { 0x0694, 0x0002, 0 }, /* LEGO   */
+  { 0x0694, 0xFF00, 0 }  /* NXTOS  */
 };
 
 struct nxt_t
 {
-  struct usb_device *dev;
-  struct usb_dev_handle *hdl;
+  libusb_context *usb;
+  libusb_device *dev;
   nxt_firmware firmware;
   int interface;
+  libusb_device_handle *hdl;
 };
 
 nxt_error_t
 nxt_init(nxt_t **nxt)
 {
-  usb_init();
-  *nxt = calloc(1, sizeof(**nxt));
+  int ret;
+  nxt_t *lnxt;
 
+  lnxt = calloc(1, sizeof(*lnxt));
+  if (!lnxt)
+    return NXT_ERROR_NO_MEM;
+
+  ret = libusb_init(&lnxt->usb);
+  if (ret < 0)
+    {
+      free(lnxt);
+      return NXT_ERROR_USB(ret);
+    }
+
+  *nxt = lnxt;
   return NXT_OK;
 }
 
 nxt_error_t
 nxt_find(nxt_t *nxt)
 {
-  struct usb_bus *busses, *bus;
+  libusb_device **list;
 
-  usb_find_busses();
-  usb_find_devices();
+  assert(!nxt->dev);
 
-  busses = usb_get_busses();
-
-  for (bus = busses; bus != NULL; bus = bus->next)
+  ssize_t cnt = libusb_get_device_list(nxt->usb, &list);
+  if (cnt < 0)
     {
-      struct usb_device *dev;
-
-      for (dev = bus->devices; dev != NULL; dev = dev->next)
+      return NXT_ERROR_USB(cnt);
+    }
+  for (ssize_t j = 0; j < cnt; j++)
+    {
+      libusb_device *dev = list[j];
+      struct libusb_device_descriptor desc;
+      int ret = libusb_get_device_descriptor(dev, &desc);
+      if (ret == 0)
         {
-          int i;
-
-          for (i = 0; i < N_FIRMWARES; i++)
-            if (dev->descriptor.idVendor == nxt_usb_ids[i].vendor_id &&
-                dev->descriptor.idProduct == nxt_usb_ids[i].product_id)
-              {
-                nxt->dev = dev;
-                nxt->firmware = i;
-                return NXT_OK;
-              }
+          for (int i = 0; i < N_FIRMWARES; i++)
+            {
+              if (desc.idVendor == nxt_usb_ids[i].vendor_id &&
+                  desc.idProduct == nxt_usb_ids[i].product_id)
+                {
+                  libusb_ref_device(dev);
+                  libusb_free_device_list(list, 1);
+                  nxt->dev = dev;
+                  nxt->firmware = i;
+                  nxt->interface = nxt_usb_ids[i].interface;
+                  return NXT_OK;
+                }
+            }
         }
     }
 
+  libusb_free_device_list(list, 1);
   return NXT_NOT_PRESENT;
 }
 
 nxt_error_t
-nxt_open(nxt_t *nxt, int interface)
+nxt_open(nxt_t *nxt)
 {
   int ret;
+  libusb_device_handle *hdl;
 
-  nxt->hdl = usb_open(nxt->dev);
+  assert(nxt->dev);
+  assert(!nxt->hdl);
 
-  // Try to detach driver, but ignore errors, only implemented on Linux
-  usb_detach_kernel_driver_np(nxt->hdl, interface);
-
-  ret = usb_set_configuration(nxt->hdl, 1);
+  ret = libusb_open(nxt->dev, &hdl);
   if (ret < 0)
+    return NXT_ERROR_USB(ret);
+
+  // Try to detach driver, but ignore errors when not implemented, or kernel
+  // driver not attached.
+  ret = libusb_detach_kernel_driver(hdl, nxt->interface);
+  if (ret < 0 && ret != LIBUSB_ERROR_NOT_SUPPORTED &&
+      ret != LIBUSB_ERROR_NOT_FOUND)
     {
-      usb_close(nxt->hdl);
-      return NXT_CONFIGURATION_ERROR;
+      libusb_close(hdl);
+      return NXT_ERROR_USB(ret);
     }
 
-  ret = usb_claim_interface(nxt->hdl, interface);
-  if (ret < 0)
+  ret = libusb_set_configuration(hdl, 1);
+  if (ret < 0 && ret != LIBUSB_ERROR_NOT_SUPPORTED)
     {
-      usb_close(nxt->hdl);
-      return NXT_IN_USE;
+      libusb_close(hdl);
+      return NXT_ERROR_USB(ret);
     }
 
-  nxt->interface = interface;
+  ret = libusb_claim_interface(hdl, nxt->interface);
+  if (ret < 0)
+    {
+      libusb_close(hdl);
+      return NXT_ERROR_USB(ret);
+    }
 
+  nxt->hdl = hdl;
   return NXT_OK;
 }
 
-nxt_error_t
+void
 nxt_close(nxt_t *nxt)
 {
-  usb_release_interface(nxt->hdl, nxt->interface);
-  usb_close(nxt->hdl);
+  if (nxt->hdl)
+    {
+      libusb_release_interface(nxt->hdl, nxt->interface);
+      libusb_close(nxt->hdl);
+    }
+  if (nxt->dev)
+    libusb_unref_device(nxt->dev);
+  libusb_exit(nxt->usb);
   free(nxt);
-
-  return NXT_OK;
 }
 
 int
@@ -136,9 +174,19 @@ nxt_is_firmware(nxt_t *nxt, nxt_firmware fw)
 nxt_error_t
 nxt_send_buf(nxt_t *nxt, char *buf, int len)
 {
-  int ret = usb_bulk_write(nxt->hdl, 0x1, buf, len, 0);
-  if (ret < 0)
-    return NXT_USB_WRITE_ERROR;
+  int ret;
+  int transfered;
+
+  do
+    {
+      ret = libusb_bulk_transfer(nxt->hdl, 0x01, (unsigned char *)buf, len,
+                                 &transfered, 0);
+      if (ret < 0)
+        return NXT_ERROR_USB(ret);
+      buf += transfered;
+      len -= transfered;
+    }
+  while (len);
 
   return NXT_OK;
 }
@@ -152,9 +200,19 @@ nxt_send_str(nxt_t *nxt, char *str)
 nxt_error_t
 nxt_recv_buf(nxt_t *nxt, char *buf, int len)
 {
-  int ret = usb_bulk_read(nxt->hdl, 0x82, buf, len, 0);
-  if (ret < 0)
-    return NXT_USB_READ_ERROR;
+  int ret;
+  int transfered;
+
+  do
+    {
+      ret = libusb_bulk_transfer(nxt->hdl, 0x82, (unsigned char *)buf, len,
+                                 &transfered, 0);
+      if (ret < 0)
+        return NXT_ERROR_USB(ret);
+      buf += transfered;
+      len -= transfered;
+    }
+  while (len);
 
   return NXT_OK;
 }

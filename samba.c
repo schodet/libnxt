@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "samba.h"
 #include "error.h"
 #include "lowlevel.h"
+#include "samba.h"
 
 static nxt_error_t
 nxt_format_command2(char *buf, char cmd, nxt_addr_t addr, nxt_word_t word)

@@ -19,23 +19,26 @@
  * USA
  */
 
+#include <libusb.h>
+
 #include "error.h"
 
 static const char *const err_str[] = {
   "Success",
   "NXT not found on USB bus",
-  "Error trying to configure the NXT USB link",
-  "NXT USB interface is already claimed by another program",
-  "USB write error",
-  "USB read error",
-  "SAM-BA protocol error",
   "NXT handshake failed",
   "File open/handling error",
   "Invalid firmware image",
+  "Exhausted virtual memory",
 };
 
 const char *
 nxt_str_error(nxt_error_t err)
 {
-  return err_str[err];
+  if (err >= NXT_ERROR_USB_MIN)
+    return libusb_strerror(-(err - NXT_ERROR_USB_MIN));
+  else if (err >= 0 && err < sizeof(err_str) / sizeof(err_str[0]))
+    return err_str[err];
+  else
+    return "Unknown error";
 }

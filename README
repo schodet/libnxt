@@ -18,7 +18,7 @@ intelligent brick at a relatively low level. It currently does:
 
 LibNXT is targetted at the platforms that the official Lego Minstorms
 NXT software overlooks. Specifically, it will work on any
-POSIX-compliant operating system where libusb 0.1 is supported.
+POSIX-compliant operating system where libusb 1.0 is supported.
 
 The design of LibNXT is layered, meaning you can plug into it at any
 level of complexity or abstraction you desire, from the lowest level
@@ -85,10 +85,10 @@ library.
 How?
 ====
 
-To compile all of this you'll need a copy of libusb 0.1 on your system,
+To compile all of this you'll need a copy of libusb 1.0 on your system,
 as well as the Meson build system.
 
- - Libusb 0.1: https://libusb.info/
+ - Libusb 1.0: https://libusb.info/
  - Meson: https://mesonbuild.com/
 
 When you have all that, build with:

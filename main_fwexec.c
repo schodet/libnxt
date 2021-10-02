@@ -114,7 +114,7 @@ main(int argc, char *argv[])
       if (err == NXT_NOT_PRESENT)
         printf("NXT not found. Is it properly plugged in via USB?\n");
       else
-        NXT_HANDLE_ERR(0, NULL, "Error while scanning for NXT");
+        NXT_HANDLE_ERR(err, nxt, "Error while scanning for NXT");
       exit(1);
     }
 
@@ -125,9 +125,8 @@ main(int argc, char *argv[])
       exit(2);
     }
 
-  NXT_HANDLE_ERR(nxt_open(nxt, NXT_SAMBA_INTERFACE), NULL,
-                 "Error while connecting to NXT");
-  NXT_HANDLE_ERR(nxt_handshake(nxt), NULL, "Error during initial handshake");
+  NXT_HANDLE_ERR(nxt_open(nxt), nxt, "Error while connecting to NXT");
+  NXT_HANDLE_ERR(nxt_handshake(nxt), nxt, "Error during initial handshake");
 
   printf("NXT device in reset mode located and opened.\n"
          "Uploading firmware...\n");
@@ -139,7 +138,7 @@ main(int argc, char *argv[])
   printf("Firmware uploaded, executing...\n");
   NXT_HANDLE_ERR(nxt_jump(nxt, jump_addr), nxt, "Error jumping to C program");
 
-  NXT_HANDLE_ERR(nxt_close(nxt), NULL, "Error while closing connection to NXT");
+  nxt_close(nxt);
 
   printf("Firmware started.\n");
 

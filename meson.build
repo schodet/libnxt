@@ -1,7 +1,7 @@
 project('libnxt', 'c',
   version : '0.3')
 
-usbdep = dependency('libusb', version : ['>=0.1', '<1.0'])
+usbdep = dependency('libusb-1.0')
 
 subdir('flash_write')
 
@@ -20,15 +20,16 @@ lib = static_library('libnxt',
   'lowlevel.c',
   'samba.c',
   flash_routine_h,
+  dependencies : usbdep,
 )
 
 executable('fwflash',
   'main_fwflash.c',
-  link_with : lib, dependencies : usbdep,
+  link_with : lib,
   install : true,
 )
 executable('fwexec',
   'main_fwexec.c',
-  link_with : lib, dependencies : usbdep,
+  link_with : lib,
   install : true,
 )

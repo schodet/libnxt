@@ -171,16 +171,15 @@ nxt_is_firmware(nxt_t *nxt, nxt_firmware fw)
   return (nxt->firmware == fw);
 }
 
-nxt_error_t
-nxt_send_buf(nxt_t *nxt, char *buf, int len)
+static nxt_error_t
+nxt_transfer_buf(nxt_t *nxt, uint8_t endpoint, uint8_t *buf, int len)
 {
   int ret;
   int transfered;
 
   do
     {
-      ret = libusb_bulk_transfer(nxt->hdl, 0x01, (unsigned char *)buf, len,
-                                 &transfered, 0);
+      ret = libusb_bulk_transfer(nxt->hdl, endpoint, buf, len, &transfered, 0);
       if (ret < 0)
         return NXT_ERROR_USB(ret);
       buf += transfered;
@@ -192,27 +191,19 @@ nxt_send_buf(nxt_t *nxt, char *buf, int len)
 }
 
 nxt_error_t
-nxt_send_str(nxt_t *nxt, char *str)
+nxt_send_buf(nxt_t *nxt, const uint8_t *buf, int len)
 {
-  return nxt_send_buf(nxt, str, strlen(str));
+  return nxt_transfer_buf(nxt, 0x01, (uint8_t *)buf, len);
 }
 
 nxt_error_t
-nxt_recv_buf(nxt_t *nxt, char *buf, int len)
+nxt_send_str(nxt_t *nxt, const char *str)
 {
-  int ret;
-  int transfered;
+  return nxt_send_buf(nxt, (const uint8_t *)str, strlen(str));
+}
 
-  do
-    {
-      ret = libusb_bulk_transfer(nxt->hdl, 0x82, (unsigned char *)buf, len,
-                                 &transfered, 0);
-      if (ret < 0)
-        return NXT_ERROR_USB(ret);
-      buf += transfered;
-      len -= transfered;
-    }
-  while (len);
-
-  return NXT_OK;
+nxt_error_t
+nxt_recv_buf(nxt_t *nxt, uint8_t *buf, int len)
+{
+  return nxt_transfer_buf(nxt, 0x82, buf, len);
 }

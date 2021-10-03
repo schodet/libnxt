@@ -22,6 +22,8 @@
 #ifndef __LOWLEVEL_H__
 #define __LOWLEVEL_H__
 
+#include <stdint.h>
+
 #include "error.h"
 
 struct nxt_t;
@@ -40,8 +42,8 @@ nxt_error_t nxt_find(nxt_t *nxt);
 nxt_error_t nxt_open(nxt_t *nxt);
 void nxt_close(nxt_t *nxt);
 int nxt_is_firmware(nxt_t *nxt, nxt_firmware fw);
-nxt_error_t nxt_send_buf(nxt_t *nxt, char *buf, int len);
-nxt_error_t nxt_send_str(nxt_t *nxt, char *str);
-nxt_error_t nxt_recv_buf(nxt_t *nxt, char *buf, int len);
+nxt_error_t nxt_send_buf(nxt_t *nxt, const uint8_t *buf, int len);
+nxt_error_t nxt_send_str(nxt_t *nxt, const char *str);
+nxt_error_t nxt_recv_buf(nxt_t *nxt, uint8_t *buf, int len);
 
 #endif /* __LOWLEVEL_H__ */

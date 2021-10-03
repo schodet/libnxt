@@ -38,7 +38,7 @@
   while (0)
 
 static int
-handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
+handle_error(nxt_t *nxt, const char *msg, nxt_error_t err)
 {
   printf("%s: %s\n", msg, nxt_str_error(err));
   if (nxt != NULL)
@@ -47,7 +47,7 @@ handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
 }
 
 void
-get_firmware(char **firmware, int *len, char *filename)
+get_firmware(uint8_t **firmware, int *len, const char *filename)
 {
   FILE *f;
 
@@ -67,7 +67,7 @@ get_firmware(char **firmware, int *len, char *filename)
   if (*firmware == NULL)
     NXT_HANDLE_ERR(NXT_FILE_ERROR, NULL, "Error allocating memory");
 
-  if (fread(*firmware, 1, *len, f) != *len)
+  if (fread(*firmware, 1, *len, f) != (size_t)*len)
     NXT_HANDLE_ERR(NXT_FILE_ERROR, NULL, "Error reading file");
 
   printf("Firmware size is %d bytes\n", *len);
@@ -80,7 +80,7 @@ main(int argc, char *argv[])
 {
   nxt_t *nxt;
   nxt_error_t err;
-  char *firmware;
+  uint8_t *firmware;
   int firmware_len;
   long load_addr;
   long jump_addr;

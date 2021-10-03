@@ -50,7 +50,7 @@ nxt_flash_prepare(nxt_t *nxt)
 }
 
 static nxt_error_t
-nxt_flash_block(nxt_t *nxt, nxt_word_t block_num, char *buf)
+nxt_flash_block(nxt_t *nxt, nxt_word_t block_num, const uint8_t *buf)
 {
   // Set the target block number
   NXT_ERR(nxt_write_word(nxt, 0x202300, block_num));
@@ -85,7 +85,7 @@ nxt_firmware_validate_fd(int fd)
 }
 
 nxt_error_t
-nxt_firmware_validate(char *fw_path)
+nxt_firmware_validate(const char *fw_path)
 {
   nxt_error_t err;
   int fd;
@@ -101,7 +101,7 @@ nxt_firmware_validate(char *fw_path)
 }
 
 nxt_error_t
-nxt_firmware_flash(nxt_t *nxt, char *fw_path)
+nxt_firmware_flash(nxt_t *nxt, const char *fw_path)
 {
   int fd, i, err;
 
@@ -120,7 +120,7 @@ nxt_firmware_flash(nxt_t *nxt, char *fw_path)
 
   for (i = 0; i < 1024; i++)
     {
-      char buf[256];
+      uint8_t buf[256];
       int ret;
 
       memset(buf, 0, 256);

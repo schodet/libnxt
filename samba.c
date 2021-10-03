@@ -19,6 +19,7 @@
  * USA
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -56,7 +57,7 @@ nxt_write_common(nxt_t *nxt, char type, nxt_addr_t addr, nxt_word_t w)
 nxt_error_t
 nxt_handshake(nxt_t *nxt)
 {
-  char buf[2];
+  uint8_t buf[2];
 
   nxt_send_str(nxt, "N#");
   nxt_recv_buf(nxt, buf, 2);
@@ -91,14 +92,17 @@ static nxt_error_t
 nxt_read_common(nxt_t *nxt, char cmd, int len, nxt_addr_t addr,
                 nxt_word_t *word)
 {
-  char buf[20] = { 0 };
+  char sbuf[20] = { 0 };
+  uint8_t rbuf[4] = { 0 };
 
-  NXT_ERR(nxt_format_command2(buf, cmd, addr, len));
-  NXT_ERR(nxt_send_str(nxt, buf));
-  NXT_ERR(nxt_recv_buf(nxt, buf, len));
+  assert(len <= 4);
+
+  NXT_ERR(nxt_format_command2(sbuf, cmd, addr, len));
+  NXT_ERR(nxt_send_str(nxt, sbuf));
+  NXT_ERR(nxt_recv_buf(nxt, rbuf, len));
 
   /* The value returned is in little-endian byte ordering. */
-  *word = buf[3] << 24 | buf[2] << 16 | buf[1] << 8 | buf[0];
+  *word = rbuf[3] << 24 | rbuf[2] << 16 | rbuf[1] << 8 | rbuf[0];
   return NXT_OK;
 }
 
@@ -130,7 +134,8 @@ nxt_read_word(nxt_t *nxt, nxt_addr_t addr, nxt_word_t *w)
 }
 
 nxt_error_t
-nxt_send_file(nxt_t *nxt, nxt_addr_t addr, char *file, unsigned short len)
+nxt_send_file(nxt_t *nxt, nxt_addr_t addr, const uint8_t *file,
+              unsigned short len)
 {
   char buf[20];
 
@@ -142,7 +147,7 @@ nxt_send_file(nxt_t *nxt, nxt_addr_t addr, char *file, unsigned short len)
 }
 
 nxt_error_t
-nxt_recv_file(nxt_t *nxt, nxt_addr_t addr, char *file, unsigned short len)
+nxt_recv_file(nxt_t *nxt, nxt_addr_t addr, uint8_t *file, unsigned short len)
 {
   char buf[20];
 
@@ -169,7 +174,7 @@ nxt_samba_version(nxt_t *nxt, char *version)
   char buf[3];
   strcpy(buf, "V#");
   NXT_ERR(nxt_send_str(nxt, buf));
-  NXT_ERR(nxt_recv_buf(nxt, version, 4));
+  NXT_ERR(nxt_recv_buf(nxt, (uint8_t *)version, 4));
   version[4] = 0;
   return NXT_OK;
 }

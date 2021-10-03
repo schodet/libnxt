@@ -30,7 +30,7 @@
 typedef uint32_t nxt_addr_t;
 typedef uint32_t nxt_word_t;
 typedef uint16_t nxt_hword_t;
-typedef unsigned char nxt_byte_t;
+typedef uint8_t nxt_byte_t;
 
 nxt_error_t nxt_handshake(nxt_t *nxt);
 
@@ -42,9 +42,9 @@ nxt_error_t nxt_read_byte(nxt_t *nxt, nxt_addr_t addr, nxt_byte_t *b);
 nxt_error_t nxt_read_hword(nxt_t *nxt, nxt_addr_t addr, nxt_hword_t *hw);
 nxt_error_t nxt_read_word(nxt_t *nxt, nxt_addr_t addr, nxt_word_t *w);
 
-nxt_error_t nxt_send_file(nxt_t *nxt, nxt_addr_t addr, char *file,
+nxt_error_t nxt_send_file(nxt_t *nxt, nxt_addr_t addr, const uint8_t *file,
                           unsigned short len);
-nxt_error_t nxt_recv_file(nxt_t *nxt, nxt_addr_t addr, char *file,
+nxt_error_t nxt_recv_file(nxt_t *nxt, nxt_addr_t addr, uint8_t *file,
                           unsigned short len);
 
 nxt_error_t nxt_jump(nxt_t *nxt, nxt_addr_t addr);

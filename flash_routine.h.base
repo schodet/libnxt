@@ -23,10 +23,12 @@
 #ifndef __FLASH_ROUTINE_H__
 #define __FLASH_ROUTINE_H__
 
+#include <stdint.h>
+
 /*
  * An array containing all the bits of the flash routine bytecode.
  */
-static char flash_bin[] = {___FLASH_BIN___};
+static uint8_t flash_bin[] = {___FLASH_BIN___};
 
 /*
  * The number of bytes in the above array.

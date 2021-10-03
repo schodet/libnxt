@@ -37,7 +37,7 @@
   while (0)
 
 static int
-handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
+handle_error(nxt_t *nxt, const char *msg, nxt_error_t err)
 {
   printf("%s: %s\n", msg, nxt_str_error(err));
   if (nxt != NULL)
@@ -46,11 +46,11 @@ handle_error(nxt_t *nxt, char *msg, nxt_error_t err)
 }
 
 int
-main(int argc, char *argv[])
+main(int argc, const char *argv[])
 {
   nxt_t *nxt;
   nxt_error_t err;
-  char *fw_file;
+  const char *fw_file;
 
   if (argc != 2)
     {

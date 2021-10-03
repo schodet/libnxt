@@ -19,16 +19,15 @@
  * USA
  */
 
-#include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "error.h"
 #include "firmware.h"
+
+#include "error.h"
 #include "flash.h"
 #include "flash_routine.h"
 #include "lowlevel.h"

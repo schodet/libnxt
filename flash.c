@@ -19,16 +19,8 @@
  * USA
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#include "error.h"
 #include "flash.h"
-#include "lowlevel.h"
+
 #include "samba.h"
 
 enum nxt_flash_commands

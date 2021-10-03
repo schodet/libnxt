@@ -23,8 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "error.h"
-#include "lowlevel.h"
 #include "samba.h"
 
 static nxt_error_t

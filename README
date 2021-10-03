@@ -1,6 +1,5 @@
                   LibNXT and FwFlash
                         v0.3
-                    David Anderson
                  ====================
 
 What?
@@ -42,51 +41,22 @@ firmwares during development without wearing down the flash memory.
 Who?
 ====
 
-Uh, that would be me. David Anderson, linux/open source developer and
+Original author is David Anderson, linux/open source developer and
 enthusiast, and fan of embedded stuff in general. As mentionned above,
 the `fwexec` utility was originally written by Lawrie Griffiths, over
 at Lejos.
 
-When?
-=====
-
-Started the day after receiving the NXT kit, I started by working out
-the firmware flashing procedure from the specs and a USB dump of the
-windows software at work. Since then, after obtaining a
-proof-of-concept application, I've been implementing this library to
-abstract the horrors of low-level USB chatter into a nice, clean
-library.
-
- - Release 0.3 (22/04/2007) : more than a year later, there are a few
-                changes, and it can't hurt to push them out in an
-                actual release. This release includes a more
-                intelligent build system that handles a missing flash
-                driver elegantly, and the `fwexec` utility program.
-                Unless people have specific itches that need
-                scratching, or bugs that should be fixed, this will
-                probably be the final release of libnxt. My personal
-                itch is scratched, and I've moved on to using libnxt
-                to write firmware code :-).
-
- - Release 0.2 (17/03/2006) : firmware flashing is now done entirely
-                with open source code. The flash driver routine has
-                been replaced with open source code implementing the
-                flashing procedure.
-
- - Release 0.1.1 (10/03/2006) : add big-endian host arch support, and
-                make the firmware image reading process a little less
-                linux-centric (use of the posix open/read/close API
-                instead of mmap).
-
- - Release 0.1 (10/03/2006) : featuring the FwFlash utility and a
-                LibNXT with just enough API in it to get FwFlash
-                working :-)
+Fourteen years after the last release, Nicolas Schodet took over the
+project to make it live for another decade or more. First goal is to
+update it to use new libusb versions, then next goals will be to add
+new features and make it easier to use, while still staying true to
+the original design.
 
 How?
 ====
 
-To compile all of this you'll need a copy of libusb 1.0 on your system,
-as well as the Meson build system.
+To compile all of this you'll need a copy of libusb 1.0 on your
+system, as well as the Meson build system.
 
  - Libusb 1.0: https://libusb.info/
  - Meson: https://mesonbuild.com/
@@ -98,14 +68,37 @@ When you have all that, build with:
     meson compile
 
 Once you're done, you can try fwflash out by resetting your NXT (see
-your user manual for details on this) and running:
+bellow) and running:
 
     ./fwflash firmware.bin
 
-firmware.bin is a Lego Mindstorms NXT firmware. You can find this on
-your current installation of the Mindstorms software, on LEGO's website,
-on the NXT Improved Firwmare website, or on the Enhanced NBC/NXC
-Firmware website.
+How to flash a NXT firmware?
+============================
+
+Make sure you have a firmware to flash. This is usually a .rfw or .bin
+file of size 262144 byte. You can find one:
+
+- on your current installation of the Minstorms software,
+- on the NXT Improved Firmware website:
+  https://nxt-firmware.ni.fr.eu.org/releases/
+- or on the Enhanced NBC/NXC Firmware website:
+  http://bricxcc.sourceforge.net/firmware.html
+
+Connect the NXT using a USB cable. You can check in your operating
+system logs that the NXT is detected. On linux, you can also check
+that the NXT is connected using lsusb. Make sure that the cable is
+good as it was reported that bad cable make the procedure fail.
+
+Then press and hold, for at least five seconds, the reset button which
+is hidden in the pin hole under the USB port. The brick should make a
+clicking noise and you can check in your operating system logs that
+the NXT is detected in SAM-BA mode, with a different identification.
+
+Then run fwflash:
+
+    ./fwflash firmware.bin
+
+Where firmware.bin is the path to your firmware file.
 
 If all goes well, fwflash should inform you that it has found the NXT
 on your USB device bus, and that flashing has started. After a few
@@ -114,6 +107,6 @@ booted the new firmware, which should be answered by the greeting
 sound of the LEGO firmware as the brick starts up :-).
 
 If it doesn't, well it's either a problem with your USB device
-permissions (if fwflash can't find the NXT), or it's a bug (if the brick
-doesn't reboot properly, or if some weird error is reported by fwflash
-and it bombs out.
+permissions (if fwflash can't find the NXT), or it's a bug (if the
+brick doesn't reboot properly, or if some weird error is reported by
+fwflash and it bombs out.

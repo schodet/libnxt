@@ -1,7 +1,7 @@
 /**
  * NXT bootstrap interface; NXT onboard flashing driver.
  *
- * Copyright 2006 David Anderson <david.anderson@calixo.net>
+ * Copyright 2006 David Anderson <dave@natulte.net>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

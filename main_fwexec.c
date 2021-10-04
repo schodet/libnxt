@@ -2,7 +2,7 @@
  * Main program code for the runc utility.
  *
  * Copyright 2006 Lawrie Griffiths <lawrie.griffiths@ntlworld.com>
- *           2007 David Anderson <david.anderson@calixo.net>
+ *           2007 David Anderson <dave@natulte.net>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

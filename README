@@ -56,10 +56,11 @@ How?
 ====
 
 To compile all of this you'll need a copy of libusb 1.0 on your
-system, as well as the Meson build system.
+system, as well as an ARM compiler and the Meson build system.
 
- - Libusb 1.0: https://libusb.info/
- - Meson: https://mesonbuild.com/
+If you are running a debian based system, you can install them using:
+
+    sudo apt install build-essential libusb-1.0-0-dev meson gcc-arm-none-eabi
 
 When you have all that, build with:
 

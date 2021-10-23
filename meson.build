@@ -1,10 +1,12 @@
 project('libnxt', 'c',
   default_options : 'warning_level=3',
+  meson_version : '>=0.55.0',
   version : '0.4.1')
 
 usbdep = dependency('libusb-1.0')
 
 subdir('flash_write')
+subdir('doc')
 
 prog_python = import('python').find_installation('python3')
 flash_routine_h = custom_target(

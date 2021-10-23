@@ -62,6 +62,10 @@ If you are running a debian based system, you can install them using:
 
     sudo apt install build-essential libusb-1.0-0-dev meson gcc-arm-none-eabi
 
+To build the optional manual pages, you also need scdoc:
+
+    sudo apt install scdoc
+
 When you have all that, build with:
 
     meson build

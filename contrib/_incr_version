@@ -1,0 +1,5 @@
+#!/bin/sh -eux
+sed -i meson.build -e "s/^  version : '${1}'/  version : '${2}'/"
+sed -i README -e "s/v${1}/v${2}/"
+git add meson.build README
+git commit -m "Update version to ${2}"

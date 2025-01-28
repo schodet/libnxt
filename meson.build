@@ -1,6 +1,6 @@
 project('libnxt', 'c',
   default_options : 'warning_level=3',
-  meson_version : '>=0.55.0',
+  meson_version : '>=0.60.0',
   version : '0.4.2')
 
 usbdep = dependency('libusb-1.0')
@@ -8,7 +8,7 @@ usbdep = dependency('libusb-1.0')
 subdir('flash_write')
 subdir('doc')
 
-prog_python = import('python').find_installation('python3')
+prog_python = import('python').find_installation()
 flash_routine_h = custom_target(
   'flash_routine.h',
   output : 'flash_routine.h',
@@ -16,7 +16,7 @@ flash_routine_h = custom_target(
   command : [prog_python, '@INPUT0@', '-o', '@OUTPUT@', '@INPUT1@', '@INPUT2@'],
 )
 
-lib = static_library('libnxt',
+lib = static_library('nxt',
   'error.c',
   'firmware.c',
   'flash.c',

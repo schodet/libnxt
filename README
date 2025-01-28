@@ -68,7 +68,7 @@ To build the optional manual pages, you also need scdoc:
 
 When you have all that, build with:
 
-    meson build
+    meson setup build
     cd build
     meson compile
 

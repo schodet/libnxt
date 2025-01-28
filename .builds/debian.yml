@@ -1,0 +1,14 @@
+image: debian/stable
+packages:
+  - meson
+  - pkg-config
+  - libusb-1.0-0-dev
+  - gcc-arm-none-eabi
+  - scdoc
+sources:
+  - https://git.sr.ht/~ni/libnxt
+tasks:
+  - build: |
+      cd libnxt
+      meson setup build
+      ninja -C build

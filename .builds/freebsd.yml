@@ -1,0 +1,14 @@
+image: freebsd/latest
+packages:
+  - meson
+  - pkgconf
+  - arm-none-eabi-gcc
+  - python3
+  - scdoc
+sources:
+  - https://git.sr.ht/~ni/libnxt
+tasks:
+  - build: |
+      cd libnxt
+      meson setup build
+      ninja -C build

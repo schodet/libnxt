@@ -1,5 +1,7 @@
 image: debian/stable
 packages:
+  - pre-commit
+  - clang-format
   - meson
   - pkg-config
   - libusb-1.0-0-dev
@@ -8,6 +10,9 @@ packages:
 sources:
   - https://git.sr.ht/~ni/libnxt
 tasks:
+  - pre-commit-check: |
+      cd libnxt
+      pre-commit run -a
   - build: |
       cd libnxt
       meson setup build

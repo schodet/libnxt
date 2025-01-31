@@ -20,9 +20,9 @@
  */
 
 #include <fcntl.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "firmware.h"

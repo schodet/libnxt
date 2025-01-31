@@ -26,6 +26,8 @@
 
 #include "error.h"
 
+#define NXT_CONNECTION_SIZE sizeof("usb.255.255")
+
 typedef struct nxt_t nxt_t;
 
 typedef enum
@@ -36,8 +38,13 @@ typedef enum
   N_FIRMWARES,
 } nxt_firmware;
 
+typedef void (*nxt_list_cb_t)(void *user, const char *connection,
+                              nxt_firmware fw, const char *serial,
+                              const char *name);
+
 nxt_error_t nxt_init(nxt_t **nxt);
 void nxt_exit(nxt_t *nxt);
+nxt_error_t nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user);
 nxt_error_t nxt_find(nxt_t *nxt);
 nxt_error_t nxt_open(nxt_t *nxt);
 void nxt_close(nxt_t *nxt);

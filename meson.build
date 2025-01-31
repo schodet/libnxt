@@ -27,12 +27,12 @@ lib = static_library('nxt',
 )
 
 executable('fwflash',
-  'main_fwflash.c',
+  'main_fwflash.c', 'common.c',
   link_with : lib,
   install : true,
 )
 executable('fwexec',
-  'main_fwexec.c',
+  'main_fwexec.c', 'common.c',
   link_with : lib,
   install : true,
 )

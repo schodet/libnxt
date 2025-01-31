@@ -8,6 +8,8 @@ fwflash - flash firmware image to a connected NXT device
 
 *fwflash* _file_
 
+*fwflash* (*-l*|*-h*)
+
 # DESCRIPTION
 
 The *fwflash* utility takes a firmware image file and sends it to a connected
@@ -31,6 +33,13 @@ should announce successful flashing.
 In case of problem, check your USB cable, and your device permissions.
 
 The *fwflash* utility is part of LibNXT.
+
+# OPTIONS
+
+*-l*
+	List detected devices and exit.
+*-h*
+	Show help message and exit.
 
 # SEE ALSO
 

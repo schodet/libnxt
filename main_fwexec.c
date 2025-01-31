@@ -2,7 +2,8 @@
  * Main program code for the runc utility.
  *
  * Copyright 2006 Lawrie Griffiths <lawrie.griffiths@ntlworld.com>
- *           2007 David Anderson <dave@natulte.net>
+ * Copyright 2007 David Anderson <dave@natulte.net>
+ * Copyright 2025 Nicolas Schodet
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -20,34 +21,16 @@
  * USA
  */
 
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
+#include "common.h"
 #include "error.h"
-#include "firmware.h"
 #include "lowlevel.h"
 #include "samba.h"
-
-#define NXT_HANDLE_ERR(expr, nxt, msg)         \
-  do                                           \
-    {                                          \
-      nxt_error_t nxt__err_temp = (expr);      \
-      if (nxt__err_temp)                       \
-        handle_error(nxt, msg, nxt__err_temp); \
-    }                                          \
-  while (0)
-
-static int
-handle_error(nxt_t *nxt, const char *msg, nxt_error_t err)
-{
-  printf("%s: %s\n", msg, nxt_str_error(err));
-  if (nxt != NULL)
-    {
-      nxt_close(nxt);
-      nxt_exit(nxt);
-    }
-  exit(err);
-}
 
 void
 get_firmware(uint8_t **firmware, int *len, const char *filename)
@@ -78,38 +61,14 @@ get_firmware(uint8_t **firmware, int *len, const char *filename)
   fclose(f);
 }
 
-int
-main(int argc, char *argv[])
+static void
+fwexec(nxt_t *nxt, const char *filename, long load_addr, long jump_addr)
 {
-  nxt_t *nxt;
   nxt_error_t err;
   uint8_t *firmware;
   int firmware_len;
-  long load_addr;
-  long jump_addr;
 
-  if (argc < 2 || argc > 4)
-    {
-      printf("Syntax: %s <Firmware image to write> [load address] "
-             "[jump address]\n"
-             "\n"
-             "Example: %s beep.bin\n"
-             "         %s beep.bin 0x202000\n",
-             argv[0], argv[0], argv[0]);
-      exit(1);
-    }
-  if (argc >= 3)
-    load_addr = strtol(argv[2], NULL, 16);
-  else
-    load_addr = 0x202000;
-  if (argc == 4)
-    jump_addr = strtol(argv[3], NULL, 16);
-  else
-    jump_addr = load_addr;
-
-  get_firmware(&firmware, &firmware_len, argv[1]);
-
-  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
+  get_firmware(&firmware, &firmware_len, filename);
 
   err = nxt_find(nxt);
   if (err)
@@ -144,6 +103,87 @@ main(int argc, char *argv[])
   nxt_close(nxt);
 
   printf("Firmware started.\n");
+}
+
+static void
+usage(const char *progname, int exit_code)
+{
+  printf(
+      "Usage: %s <firmware image to write> [load address [jump address]]\n"
+      "       %s (-l|-h)\n"
+      "Upload firmware image to a connected NXT device and run it from RAM.\n"
+      "\n"
+      "Options:\n"
+      "  -l   list detected devices\n"
+      "  -h   print this help message\n"
+      "\n"
+      "Example:\n"
+      "  %s -l\n"
+      "       print detected NXT bricks\n"
+      "  %s beep.bin\n"
+      "       locate a NXT brick and run beep.bin file\n"
+      "  %s beep.bin 0x202000\n"
+      "       locate a NXT brick and run beep.bin file at address 0x202000\n",
+      progname, progname, progname, progname, progname);
+  exit(exit_code);
+}
+
+int
+main(int argc, char *const *argv)
+{
+  nxt_t *nxt;
+  bool list = false;
+  const char *filename = NULL;
+  long load_addr;
+  long jump_addr;
+  int c;
+
+  while ((c = getopt(argc, argv, "lh")) != -1)
+    {
+      switch (c)
+        {
+        case 'l':
+          list = true;
+          break;
+        case 'h':
+          usage(argv[0], 0);
+          break;
+        default:
+          usage(argv[0], 1);
+        }
+    }
+  if (list)
+    {
+      if (optind != argc)
+        usage(argv[0], 1);
+    }
+  else
+    {
+      if (optind == argc)
+        usage(argv[0], 1);
+      filename = argv[optind++];
+      load_addr = 0x202000;
+      if (optind < argc)
+        load_addr = strtol(argv[optind++], NULL, 16);
+      jump_addr = load_addr;
+      if (optind < argc)
+        jump_addr = strtol(argv[optind++], NULL, 16);
+      if (optind < argc)
+        usage(argv[0], 1);
+    }
+
+  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
+
+  if (list)
+    {
+      bool seen = false;
+      NXT_HANDLE_ERR(nxt_list(nxt, list_cb, &seen), nxt,
+                     "Error while scanning for bricks");
+      if (!seen)
+        fputs("No brick found\n", stdout);
+    }
+  else
+    fwexec(nxt, filename, load_addr, jump_addr);
 
   nxt_exit(nxt);
   return 0;

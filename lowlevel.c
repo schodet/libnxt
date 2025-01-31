@@ -2,6 +2,7 @@
  * NXT bootstrap interface; low-level USB functions.
  *
  * Copyright 2006 David Anderson <dave@natulte.net>
+ * Copyright 2025 Nicolas Schodet
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,6 +22,7 @@
 
 #include <assert.h>
 #include <libusb.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -75,6 +77,87 @@ nxt_exit(nxt_t *nxt)
   free(nxt);
 }
 
+static nxt_firmware
+nxt_get_firmware(const struct libusb_device_descriptor *desc)
+{
+  for (nxt_firmware fw = 0; fw < N_FIRMWARES; fw++)
+    {
+      if (desc->idVendor == nxt_usb_ids[fw].vendor_id &&
+          desc->idProduct == nxt_usb_ids[fw].product_id)
+        {
+          return fw;
+        }
+    }
+  return N_FIRMWARES;
+}
+
+static nxt_error_t
+nxt_get_serial(libusb_device *dev, const struct libusb_device_descriptor *desc,
+               char *serial, size_t serial_size)
+{
+  int ret;
+  libusb_device_handle *hdl;
+
+  ret = libusb_open(dev, &hdl);
+  if (ret != 0)
+    {
+      return NXT_ERROR_USB(ret);
+    }
+  else
+    {
+      ret = libusb_get_string_descriptor_ascii(hdl, desc->iSerialNumber,
+                                               (uint8_t *)serial, serial_size);
+      libusb_close(hdl);
+      if (ret < 0)
+        return NXT_ERROR_USB(ret);
+      else
+        return NXT_OK;
+    }
+}
+
+nxt_error_t
+nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user)
+{
+  libusb_device **list;
+
+  assert(!nxt->dev);
+
+  ssize_t cnt = libusb_get_device_list(nxt->usb, &list);
+  if (cnt < 0)
+    return NXT_ERROR_USB(cnt);
+  for (ssize_t i = 0; i < cnt; i++)
+    {
+      libusb_device *dev = list[i];
+      struct libusb_device_descriptor desc;
+      int ret = libusb_get_device_descriptor(dev, &desc);
+      if (ret == 0)
+        {
+          nxt_firmware fw = nxt_get_firmware(&desc);
+          if (fw != N_FIRMWARES)
+            {
+              char connection[NXT_CONNECTION_SIZE];
+              ret = snprintf(connection, sizeof(connection), "usb.%d.%d",
+                             libusb_get_bus_number(dev),
+                             libusb_get_device_address(dev));
+              assert(ret < (int)sizeof(connection));
+              char serial_tab[20];
+              char *serial = NULL;
+              if (fw == LEGO)
+                {
+                  nxt_error_t nret = nxt_get_serial(dev, &desc, serial_tab,
+                                                    sizeof(serial_tab));
+                  if (nret == NXT_OK)
+                    serial = serial_tab;
+                }
+              cb(user, connection, fw, serial, NULL);
+            }
+        }
+    }
+
+  libusb_free_device_list(list, 1);
+  return NXT_OK;
+}
+
 nxt_error_t
 nxt_find(nxt_t *nxt)
 {
@@ -87,25 +170,22 @@ nxt_find(nxt_t *nxt)
     {
       return NXT_ERROR_USB(cnt);
     }
-  for (ssize_t j = 0; j < cnt; j++)
+  for (ssize_t i = 0; i < cnt; i++)
     {
-      libusb_device *dev = list[j];
+      libusb_device *dev = list[i];
       struct libusb_device_descriptor desc;
       int ret = libusb_get_device_descriptor(dev, &desc);
       if (ret == 0)
         {
-          for (int i = 0; i < N_FIRMWARES; i++)
+          nxt_firmware fw = nxt_get_firmware(&desc);
+          if (fw != N_FIRMWARES)
             {
-              if (desc.idVendor == nxt_usb_ids[i].vendor_id &&
-                  desc.idProduct == nxt_usb_ids[i].product_id)
-                {
-                  libusb_ref_device(dev);
-                  libusb_free_device_list(list, 1);
-                  nxt->dev = dev;
-                  nxt->firmware = i;
-                  nxt->interface = nxt_usb_ids[i].interface;
-                  return NXT_OK;
-                }
+              libusb_ref_device(dev);
+              libusb_free_device_list(list, 1);
+              nxt->dev = dev;
+              nxt->firmware = fw;
+              nxt->interface = nxt_usb_ids[fw].interface;
+              return NXT_OK;
             }
         }
     }

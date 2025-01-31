@@ -44,7 +44,7 @@ fwflash(nxt_t *nxt, const char *fw_file)
   if (err)
     {
       if (err == NXT_NOT_PRESENT)
-        printf("NXT not found. Is it properly plugged in via USB?\n");
+        fprintf(stderr, "NXT not found. Is it properly plugged in via USB?\n");
       else
         NXT_HANDLE_ERR(err, nxt, "Error while scanning for NXT");
       exit(1);
@@ -52,8 +52,9 @@ fwflash(nxt_t *nxt, const char *fw_file)
 
   if (!nxt_is_firmware(nxt, SAMBA))
     {
-      printf("NXT found, but not running in reset mode.\n");
-      printf("Please reset your NXT manually and restart this program.\n");
+      fprintf(stderr, "NXT found, but not running in reset mode.\n");
+      fprintf(stderr,
+              "Please reset your NXT manually and restart this program.\n");
       exit(2);
     }
 
@@ -75,20 +76,21 @@ fwflash(nxt_t *nxt, const char *fw_file)
 static void
 usage(const char *progname, int exit_code)
 {
-  printf("Usage: %s <firmware image to write>\n"
-         "       %s (-l|-h)\n"
-         "Flash firmware image to a connected NXT device.\n"
-         "\n"
-         "Options:\n"
-         "  -l   list detected devices\n"
-         "  -h   print this help message\n"
-         "\n"
-         "Example:\n"
-         "  %s -l\n"
-         "       print detected NXT bricks\n"
-         "  %s nxt_firmware.bin\n"
-         "       locate a NXT brick and flash nxt_firmware.bin file\n",
-         progname, progname, progname, progname);
+  fprintf(exit_code ? stderr : stdout,
+          "Usage: %s <firmware image to write>\n"
+          "       %s (-l|-h)\n"
+          "Flash firmware image to a connected NXT device.\n"
+          "\n"
+          "Options:\n"
+          "  -l   list detected devices\n"
+          "  -h   print this help message\n"
+          "\n"
+          "Example:\n"
+          "  %s -l\n"
+          "       print detected NXT bricks\n"
+          "  %s nxt_firmware.bin\n"
+          "       locate a NXT brick and flash nxt_firmware.bin file\n",
+          progname, progname, progname, progname);
   exit(exit_code);
 }
 

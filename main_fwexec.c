@@ -21,6 +21,7 @@
  * USA
  */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -74,7 +75,7 @@ fwexec(nxt_t *nxt, const char *filename, long load_addr, long jump_addr)
   if (err)
     {
       if (err == NXT_NOT_PRESENT)
-        printf("NXT not found. Is it properly plugged in via USB?\n");
+        fprintf(stderr, "NXT not found. Is it properly plugged in via USB?\n");
       else
         NXT_HANDLE_ERR(err, nxt, "Error while scanning for NXT");
       exit(1);
@@ -82,8 +83,9 @@ fwexec(nxt_t *nxt, const char *filename, long load_addr, long jump_addr)
 
   if (!nxt_is_firmware(nxt, SAMBA))
     {
-      printf("NXT found, but not running in reset mode.\n");
-      printf("Please reset your NXT manually and restart this program.\n");
+      fprintf(stderr, "NXT found, but not running in reset mode.\n");
+      fprintf(stderr,
+              "Please reset your NXT manually and restart this program.\n");
       exit(2);
     }
 
@@ -108,7 +110,8 @@ fwexec(nxt_t *nxt, const char *filename, long load_addr, long jump_addr)
 static void
 usage(const char *progname, int exit_code)
 {
-  printf(
+  fprintf(
+      exit_code ? stderr : stdout,
       "Usage: %s <firmware image to write> [load address [jump address]]\n"
       "       %s (-l|-h)\n"
       "Upload firmware image to a connected NXT device and run it from RAM.\n"
@@ -128,6 +131,21 @@ usage(const char *progname, int exit_code)
   exit(exit_code);
 }
 
+static long
+get_addr(const char *progname, const char *s)
+{
+  char *end;
+  long r;
+
+  errno = 0;
+  r = strtol(s, &end, 16);
+  if (end == s || *end != '\0' || errno)
+    {
+      fprintf(stderr, "Expect a hexadecimal address.\n");
+      usage(progname, 1);
+    }
+  return r;
+}
 int
 main(int argc, char *const *argv)
 {
@@ -164,10 +182,10 @@ main(int argc, char *const *argv)
       filename = argv[optind++];
       load_addr = 0x202000;
       if (optind < argc)
-        load_addr = strtol(argv[optind++], NULL, 16);
+        load_addr = get_addr(argv[0], argv[optind++]);
       jump_addr = load_addr;
       if (optind < argc)
-        jump_addr = strtol(argv[optind++], NULL, 16);
+        jump_addr = get_addr(argv[0], argv[optind++]);
       if (optind < argc)
         usage(argv[0], 1);
     }

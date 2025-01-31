@@ -29,7 +29,7 @@
 int
 handle_error(nxt_t *nxt, const char *msg, nxt_error_t err)
 {
-  printf("%s: %s\n", msg, nxt_str_error(err));
+  fprintf(stderr, "%s: %s\n", msg, nxt_str_error(err));
   if (nxt != NULL)
     {
       nxt_close(nxt);

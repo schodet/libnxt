@@ -60,10 +60,7 @@ nxt_handshake(nxt_t *nxt)
   nxt_send_str(nxt, "N#");
   nxt_recv_buf(nxt, buf, 2);
   if (memcmp(buf, "\n\r", 2) != 0)
-    {
-      nxt_close(nxt);
-      return NXT_HANDSHAKE_FAILED;
-    }
+    return NXT_HANDSHAKE_FAILED;
 
   return NXT_OK;
 }

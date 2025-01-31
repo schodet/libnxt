@@ -26,7 +26,6 @@
 
 #include "error.h"
 
-struct nxt_t;
 typedef struct nxt_t nxt_t;
 
 typedef enum
@@ -38,6 +37,7 @@ typedef enum
 } nxt_firmware;
 
 nxt_error_t nxt_init(nxt_t **nxt);
+void nxt_exit(nxt_t *nxt);
 nxt_error_t nxt_find(nxt_t *nxt);
 nxt_error_t nxt_open(nxt_t *nxt);
 void nxt_close(nxt_t *nxt);

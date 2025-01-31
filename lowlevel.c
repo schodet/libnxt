@@ -67,6 +67,14 @@ nxt_init(nxt_t **nxt)
   return NXT_OK;
 }
 
+void
+nxt_exit(nxt_t *nxt)
+{
+  nxt_close(nxt);
+  libusb_exit(nxt->usb);
+  free(nxt);
+}
+
 nxt_error_t
 nxt_find(nxt_t *nxt)
 {
@@ -154,11 +162,13 @@ nxt_close(nxt_t *nxt)
     {
       libusb_release_interface(nxt->hdl, nxt->interface);
       libusb_close(nxt->hdl);
+      nxt->hdl = NULL;
     }
   if (nxt->dev)
-    libusb_unref_device(nxt->dev);
-  libusb_exit(nxt->usb);
-  free(nxt);
+    {
+      libusb_unref_device(nxt->dev);
+      nxt->dev = NULL;
+    }
 }
 
 int

@@ -42,7 +42,10 @@ handle_error(nxt_t *nxt, const char *msg, nxt_error_t err)
 {
   printf("%s: %s\n", msg, nxt_str_error(err));
   if (nxt != NULL)
-    nxt_close(nxt);
+    {
+      nxt_close(nxt);
+      nxt_exit(nxt);
+    }
   exit(err);
 }
 
@@ -142,5 +145,6 @@ main(int argc, char *argv[])
 
   printf("Firmware started.\n");
 
+  nxt_exit(nxt);
   return 0;
 }

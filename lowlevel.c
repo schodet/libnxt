@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cmd.h"
 #include "lowlevel.h"
 
 #define NXT_LEGO_USB_SERIAL_OUI "001653"
@@ -146,6 +147,34 @@ nxt_get_serial(libusb_device *dev, const struct libusb_device_descriptor *desc,
     }
 }
 
+static nxt_error_t
+nxt_get_name(nxt_t *nxt, libusb_device *dev, char *name, size_t name_size)
+{
+  nxt_device_info_t device_info;
+  nxt_error_t ret;
+
+  assert(name_size >= sizeof(device_info.name));
+
+  libusb_ref_device(dev);
+  nxt->dev = dev;
+  nxt->firmware = LEGO;
+  nxt->interface = nxt_usb_ids[LEGO].interface;
+
+  ret = nxt_open(nxt);
+  if (ret != NXT_OK)
+    {
+      libusb_unref_device(dev);
+      nxt->dev = NULL;
+      return ret;
+    }
+  ret = nxt_cmd_get_device_info(nxt, &device_info);
+  nxt_close(nxt);
+  if (ret == NXT_OK)
+    memcpy(name, device_info.name, sizeof(device_info.name));
+
+  return ret;
+}
+
 nxt_error_t
 nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user)
 {
@@ -173,14 +202,20 @@ nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user)
               assert(ret < (int)sizeof(connection));
               char serial_tab[NXT_SERIAL_SIZE];
               char *serial = NULL;
+              char name_tab[NXT_NAME_SIZE];
+              char *name = NULL;
               if (fw == LEGO)
                 {
                   nxt_error_t nret = nxt_get_serial(dev, &desc, serial_tab,
                                                     sizeof(serial_tab));
                   if (nret == NXT_OK)
                     serial = serial_tab;
+
+                  nret = nxt_get_name(nxt, dev, name_tab, sizeof(name_tab));
+                  if (nret == NXT_OK)
+                    name = name_tab;
                 }
-              cb(user, connection, fw, serial, NULL);
+              cb(user, connection, fw, serial, name);
             }
         }
     }
@@ -246,6 +281,17 @@ nxt_open(nxt_t *nxt)
     {
       libusb_close(hdl);
       return NXT_ERROR_USB(ret);
+    }
+
+  // LEGO firmware needs a reset if connecting twice.
+  if (nxt->firmware == LEGO)
+    {
+      ret = libusb_reset_device(hdl);
+      if (ret < 0 && ret != LIBUSB_ERROR_NOT_SUPPORTED)
+        {
+          libusb_close(hdl);
+          return NXT_ERROR_USB(ret);
+        }
     }
 
   ret = libusb_set_configuration(hdl, 1);

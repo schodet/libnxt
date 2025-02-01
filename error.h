@@ -23,6 +23,7 @@
 #define __ERROR_H__
 
 #define NXT_ERROR_USB(ret) (NXT_ERROR_USB_MIN - (ret))
+#define NXT_ERROR_CMD(status) (NXT_ERROR_CMD_MIN + (status))
 
 typedef enum
 {
@@ -32,6 +33,8 @@ typedef enum
   NXT_FILE_ERROR = 3,
   NXT_INVALID_FIRMWARE = 4,
   NXT_ERROR_NO_MEM = 5,
+  NXT_ERROR_PROTO = 6,
+  NXT_ERROR_CMD_MIN = 0x100,
   NXT_ERROR_USB_MIN = 1000,
 } nxt_error_t;
 

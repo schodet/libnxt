@@ -17,6 +17,7 @@ flash_routine_h = custom_target(
 )
 
 lib = static_library('nxt',
+  'cmd.c',
   'error.c',
   'firmware.c',
   'flash.c',

@@ -21,6 +21,7 @@
 
 #include <libusb.h>
 
+#include "cmd.h"
 #include "error.h"
 
 static const char *const err_str[] = {
@@ -30,6 +31,7 @@ static const char *const err_str[] = {
   "File open/handling error",
   "Invalid firmware image",
   "Exhausted virtual memory",
+  "Communication protocol error",
 };
 
 const char *
@@ -37,6 +39,8 @@ nxt_str_error(nxt_error_t err)
 {
   if (err >= NXT_ERROR_USB_MIN)
     return libusb_strerror(-(err - NXT_ERROR_USB_MIN));
+  else if (err >= NXT_ERROR_CMD_MIN)
+    return nxt_cmd_str_error(err - NXT_ERROR_CMD_MIN);
   else if (err >= 0 && err < sizeof(err_str) / sizeof(err_str[0]))
     return err_str[err];
   else

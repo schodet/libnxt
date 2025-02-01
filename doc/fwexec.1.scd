@@ -6,7 +6,7 @@ fwexec - upload firmware image to a connected NXT device and run it from RAM
 
 # SYNOPSIS
 
-*fwflash* _file_ [_load_address_ [_jump_address_]]
+*fwexec* _file_ [_load_address_ [_jump_address_]]
 
 # DESCRIPTION
 

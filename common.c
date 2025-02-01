@@ -47,10 +47,10 @@ list_cb(void *user, const char *connection, nxt_firmware fw, const char *serial,
 
   if (!*seen)
     {
-      printf("%-11s  %-8s  %-13s  %s\n", "Connection", "Firmware",
+      printf("%-11s  %-8s  %-17s  %s\n", "Connection", "Firmware",
              "Serial number", "Brick name");
       *seen = true;
     }
-  printf("%-11s  %-8s  %-13s  %s\n", connection, fws[fw], serial ? serial : "-",
+  printf("%-11s  %-8s  %-17s  %s\n", connection, fws[fw], serial ? serial : "-",
          name ? name : "-");
 }

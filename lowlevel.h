@@ -27,6 +27,7 @@
 #include "error.h"
 
 #define NXT_CONNECTION_SIZE sizeof("usb.255.255")
+#define NXT_SERIAL_SIZE sizeof("00:16:53:01:02:03")
 
 typedef struct nxt_t nxt_t;
 

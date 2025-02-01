@@ -28,6 +28,9 @@
 
 #include "lowlevel.h"
 
+#define NXT_LEGO_USB_SERIAL_OUI "001653"
+#define NXT_LEGO_USB_SERIAL_LEN 12
+
 const struct
 {
   int vendor_id;
@@ -91,6 +94,27 @@ nxt_get_firmware(const struct libusb_device_descriptor *desc)
   return N_FIRMWARES;
 }
 
+static void
+serial_to_mac(char *serial)
+{
+  serial[17] = '\0';
+  serial[16] = serial[11];
+  serial[15] = serial[10];
+  serial[14] = ':';
+  serial[13] = serial[9];
+  serial[12] = serial[8];
+  serial[11] = ':';
+  serial[10] = serial[7];
+  serial[9] = serial[6];
+  serial[8] = ':';
+  serial[7] = serial[5];
+  serial[6] = serial[4];
+  serial[5] = ':';
+  serial[4] = serial[3];
+  serial[3] = serial[2];
+  serial[2] = ':';
+}
+
 static nxt_error_t
 nxt_get_serial(libusb_device *dev, const struct libusb_device_descriptor *desc,
                char *serial, size_t serial_size)
@@ -111,7 +135,14 @@ nxt_get_serial(libusb_device *dev, const struct libusb_device_descriptor *desc,
       if (ret < 0)
         return NXT_ERROR_USB(ret);
       else
-        return NXT_OK;
+        {
+          if (ret == NXT_LEGO_USB_SERIAL_LEN &&
+              memcmp(serial, NXT_LEGO_USB_SERIAL_OUI,
+                     strlen(NXT_LEGO_USB_SERIAL_OUI)) == 0 &&
+              serial_size >= NXT_SERIAL_SIZE)
+            serial_to_mac(serial);
+          return NXT_OK;
+        }
     }
 }
 
@@ -140,7 +171,7 @@ nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user)
                              libusb_get_bus_number(dev),
                              libusb_get_device_address(dev));
               assert(ret < (int)sizeof(connection));
-              char serial_tab[20];
+              char serial_tab[NXT_SERIAL_SIZE];
               char *serial = NULL;
               if (fw == LEGO)
                 {

@@ -20,7 +20,6 @@
  * USA
  */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,9 +31,12 @@
 #include "samba.h"
 
 static void
-fwflash(nxt_t *nxt, const char *fw_file)
+fwflash(const char *fw_file)
 {
+  nxt_t *nxt;
   nxt_error_t err;
+
+  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
 
   printf("Checking firmware... ");
   NXT_HANDLE_ERR(nxt_firmware_validate(fw_file), NULL, "Error");
@@ -71,6 +73,7 @@ fwflash(nxt_t *nxt, const char *fw_file)
   printf("New firmware started!\n");
 
   nxt_close(nxt);
+  nxt_exit(nxt);
 }
 
 static void
@@ -81,10 +84,7 @@ usage(const char *progname, int exit_code)
           "       %s (-l|-h)\n"
           "Flash firmware image to a connected NXT device.\n"
           "\n"
-          "Options:\n"
-          "  -l   list detected devices\n"
-          "  -h   print this help message\n"
-          "\n"
+          "Options:\n" COMMON_OPTIONS "\n"
           "Example:\n"
           "  %s -l\n"
           "       print detected NXT bricks\n"
@@ -97,50 +97,19 @@ usage(const char *progname, int exit_code)
 int
 main(int argc, char *const *argv)
 {
-  nxt_t *nxt;
-  bool list = false;
+  common_options_t common_options = { 0 };
   const char *fw_file = NULL;
   int c;
 
-  while ((c = getopt(argc, argv, "lh")) != -1)
+  while ((c = common_getopt(argc, argv, NULL, &common_options, usage)) != -1)
     {
-      switch (c)
-        {
-        case 'l':
-          list = true;
-          break;
-        case 'h':
-          usage(argv[0], 0);
-          break;
-        default:
-          usage(argv[0], 1);
-        }
+      usage(argv[0], 1);
     }
-  if (list)
-    {
-      if (optind != argc)
-        usage(argv[0], 1);
-    }
-  else
-    {
-      if (optind + 1 != argc)
-        usage(argv[0], 1);
-      fw_file = argv[optind];
-    }
+  if (optind + 1 != argc)
+    usage(argv[0], 1);
+  fw_file = argv[optind];
 
-  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
+  fwflash(fw_file);
 
-  if (list)
-    {
-      bool seen = false;
-      NXT_HANDLE_ERR(nxt_list(nxt, list_cb, &seen), nxt,
-                     "Error while scanning for bricks");
-      if (!seen)
-        fputs("No brick found\n", stdout);
-    }
-  else
-    fwflash(nxt, fw_file);
-
-  nxt_exit(nxt);
   return 0;
 }

@@ -23,8 +23,15 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <stdbool.h>
+
 #include "error.h"
 #include "lowlevel.h"
+
+#define COMMON_OPTSTRING "lh"
+#define COMMON_OPTIONS             \
+  "  -l   list detected devices\n" \
+  "  -h   print this help message\n"
 
 #define NXT_HANDLE_ERR(expr, nxt, msg)         \
   do                                           \
@@ -35,8 +42,14 @@
     }                                          \
   while (0)
 
+typedef struct
+{
+  bool list;
+} common_options_t;
+
 int handle_error(nxt_t *nxt, const char *msg, nxt_error_t err);
-void list_cb(void *user, const char *connection, nxt_firmware fw,
-             const char *serial, const char *name);
+int common_getopt(int argc, char *const *argv, const char *optstring,
+                  common_options_t *common_options,
+                  void (*usage)(const char *, int));
 
 #endif /* __COMMON_H__ */

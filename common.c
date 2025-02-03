@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "common.h"
 
@@ -38,7 +39,7 @@ handle_error(nxt_t *nxt, const char *msg, nxt_error_t err)
   exit(err);
 }
 
-void
+static void
 list_cb(void *user, const char *connection, nxt_firmware fw, const char *serial,
         const char *name)
 {
@@ -53,4 +54,52 @@ list_cb(void *user, const char *connection, nxt_firmware fw, const char *serial,
     }
   printf("%-11s  %-8s  %-17s  %s\n", connection, fws[fw], serial ? serial : "-",
          name ? name : "-");
+}
+
+static void
+common_list()
+{
+  nxt_t *nxt;
+  bool seen = false;
+
+  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
+
+  NXT_HANDLE_ERR(nxt_list(nxt, list_cb, &seen), nxt,
+                 "Error while scanning for bricks");
+  if (!seen)
+    fputs("No brick found\n", stdout);
+
+  nxt_exit(nxt);
+}
+
+int
+common_getopt(int argc, char *const *argv, const char *optstring,
+              common_options_t *common_options,
+              void (*usage)(const char *, int))
+{
+  int c;
+
+  while ((c = getopt(argc, argv, optstring ? optstring : COMMON_OPTSTRING)) !=
+         -1)
+    {
+      switch (c)
+        {
+        case 'l':
+          common_options->list = true;
+          break;
+        case 'h':
+          usage(argv[0], 0);
+          break;
+        default:
+          return c;
+        }
+    }
+  if (common_options->list)
+    {
+      if (optind != argc)
+        usage(argv[0], 1);
+      common_list();
+      exit(0);
+    }
+  return -1;
 }

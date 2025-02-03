@@ -22,7 +22,6 @@
  */
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,11 +62,14 @@ get_firmware(uint8_t **firmware, int *len, const char *filename)
 }
 
 static void
-fwexec(nxt_t *nxt, const char *filename, long load_addr, long jump_addr)
+fwexec(const char *filename, long load_addr, long jump_addr)
 {
+  nxt_t *nxt;
   nxt_error_t err;
   uint8_t *firmware;
   int firmware_len;
+
+  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
 
   get_firmware(&firmware, &firmware_len, filename);
 
@@ -101,10 +103,10 @@ fwexec(nxt_t *nxt, const char *filename, long load_addr, long jump_addr)
 
   printf("Firmware uploaded, executing...\n");
   NXT_HANDLE_ERR(nxt_jump(nxt, jump_addr), nxt, "Error jumping to C program");
+  printf("Firmware started.\n");
 
   nxt_close(nxt);
-
-  printf("Firmware started.\n");
+  nxt_exit(nxt);
 }
 
 static void
@@ -116,10 +118,7 @@ usage(const char *progname, int exit_code)
       "       %s (-l|-h)\n"
       "Upload firmware image to a connected NXT device and run it from RAM.\n"
       "\n"
-      "Options:\n"
-      "  -l   list detected devices\n"
-      "  -h   print this help message\n"
-      "\n"
+      "Options:\n" COMMON_OPTIONS "\n"
       "Example:\n"
       "  %s -l\n"
       "       print detected NXT bricks\n"
@@ -146,63 +145,33 @@ get_addr(const char *progname, const char *s)
     }
   return r;
 }
+
 int
 main(int argc, char *const *argv)
 {
-  nxt_t *nxt;
-  bool list = false;
+  common_options_t common_options = { 0 };
   const char *filename = NULL;
   long load_addr;
   long jump_addr;
   int c;
 
-  while ((c = getopt(argc, argv, "lh")) != -1)
+  while ((c = common_getopt(argc, argv, NULL, &common_options, usage)) != -1)
     {
-      switch (c)
-        {
-        case 'l':
-          list = true;
-          break;
-        case 'h':
-          usage(argv[0], 0);
-          break;
-        default:
-          usage(argv[0], 1);
-        }
+      usage(argv[0], 1);
     }
-  if (list)
-    {
-      if (optind != argc)
-        usage(argv[0], 1);
-    }
-  else
-    {
-      if (optind == argc)
-        usage(argv[0], 1);
-      filename = argv[optind++];
-      load_addr = 0x202000;
-      if (optind < argc)
-        load_addr = get_addr(argv[0], argv[optind++]);
-      jump_addr = load_addr;
-      if (optind < argc)
-        jump_addr = get_addr(argv[0], argv[optind++]);
-      if (optind < argc)
-        usage(argv[0], 1);
-    }
+  if (optind == argc)
+    usage(argv[0], 1);
+  filename = argv[optind++];
+  load_addr = 0x202000;
+  if (optind < argc)
+    load_addr = get_addr(argv[0], argv[optind++]);
+  jump_addr = load_addr;
+  if (optind < argc)
+    jump_addr = get_addr(argv[0], argv[optind++]);
+  if (optind < argc)
+    usage(argv[0], 1);
 
-  NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
+  fwexec(filename, load_addr, jump_addr);
 
-  if (list)
-    {
-      bool seen = false;
-      NXT_HANDLE_ERR(nxt_list(nxt, list_cb, &seen), nxt,
-                     "Error while scanning for bricks");
-      if (!seen)
-        fputs("No brick found\n", stdout);
-    }
-  else
-    fwexec(nxt, filename, load_addr, jump_addr);
-
-  nxt_exit(nxt);
   return 0;
 }

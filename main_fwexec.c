@@ -62,10 +62,10 @@ get_firmware(uint8_t **firmware, int *len, const char *filename)
 }
 
 static void
-fwexec(const char *filename, long load_addr, long jump_addr)
+fwexec(const char *filename, long load_addr, long jump_addr,
+       const common_options_t *common_options)
 {
   nxt_t *nxt;
-  nxt_error_t err;
   uint8_t *firmware;
   int firmware_len;
 
@@ -73,23 +73,7 @@ fwexec(const char *filename, long load_addr, long jump_addr)
 
   get_firmware(&firmware, &firmware_len, filename);
 
-  err = nxt_find(nxt);
-  if (err)
-    {
-      if (err == NXT_NOT_PRESENT)
-        fprintf(stderr, "NXT not found. Is it properly plugged in via USB?\n");
-      else
-        NXT_HANDLE_ERR(err, nxt, "Error while scanning for NXT");
-      exit(1);
-    }
-
-  if (!nxt_is_firmware(nxt, SAMBA))
-    {
-      fprintf(stderr, "NXT found, but not running in reset mode.\n");
-      fprintf(stderr,
-              "Please reset your NXT manually and restart this program.\n");
-      exit(2);
-    }
+  common_find_bootloader(nxt, common_options);
 
   NXT_HANDLE_ERR(nxt_open(nxt), nxt, "Error while connecting to NXT");
   NXT_HANDLE_ERR(nxt_handshake(nxt), nxt, "Error during initial handshake");
@@ -114,7 +98,7 @@ usage(const char *progname, int exit_code)
 {
   fprintf(
       exit_code ? stderr : stdout,
-      "Usage: %s <firmware image to write> [load address [jump address]]\n"
+      "Usage: %s [options] <image to write> [load address [jump address]]\n"
       "       %s (-l|-h)\n"
       "Upload firmware image to a connected NXT device and run it from RAM.\n"
       "\n"
@@ -171,7 +155,7 @@ main(int argc, char *const *argv)
   if (optind < argc)
     usage(argv[0], 1);
 
-  fwexec(filename, load_addr, jump_addr);
+  fwexec(filename, load_addr, jump_addr, &common_options);
 
   return 0;
 }

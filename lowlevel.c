@@ -81,6 +81,15 @@ nxt_exit(nxt_t *nxt)
   free(nxt);
 }
 
+static void
+nxt_get_connection(libusb_device *dev, char *connection, size_t connection_size)
+{
+  int ret;
+  ret = snprintf(connection, connection_size, "usb.%d.%d",
+                 libusb_get_bus_number(dev), libusb_get_device_address(dev));
+  assert(ret < (int)connection_size);
+}
+
 static nxt_firmware
 nxt_get_firmware(const struct libusb_device_descriptor *desc)
 {
@@ -196,14 +205,12 @@ nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user)
           if (fw != N_FIRMWARES)
             {
               char connection[NXT_CONNECTION_SIZE];
-              ret = snprintf(connection, sizeof(connection), "usb.%d.%d",
-                             libusb_get_bus_number(dev),
-                             libusb_get_device_address(dev));
-              assert(ret < (int)sizeof(connection));
               char serial_tab[NXT_SERIAL_SIZE];
               char *serial = NULL;
               char name_tab[NXT_NAME_SIZE];
               char *name = NULL;
+
+              nxt_get_connection(dev, connection, sizeof(connection));
               if (fw == LEGO)
                 {
                   nxt_error_t nret = nxt_get_serial(dev, &desc, serial_tab,
@@ -225,7 +232,8 @@ nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user)
 }
 
 nxt_error_t
-nxt_find(nxt_t *nxt)
+nxt_find(nxt_t *nxt, nxt_firmware match_fw, const char *match_serial,
+         const char *match_name)
 {
   libusb_device **list;
 
@@ -246,6 +254,27 @@ nxt_find(nxt_t *nxt)
           nxt_firmware fw = nxt_get_firmware(&desc);
           if (fw != N_FIRMWARES)
             {
+              nxt_error_t nret;
+              if (match_fw != N_FIRMWARES && match_fw != fw)
+                continue;
+              if (fw == LEGO && match_serial)
+                {
+                  char serial[NXT_SERIAL_SIZE];
+                  nret = nxt_get_serial(dev, &desc, serial, sizeof(serial));
+                  if (nret != NXT_OK)
+                    continue;
+                  if (strcmp(match_serial, serial) != 0)
+                    continue;
+                }
+              if (fw == LEGO && match_name)
+                {
+                  char name[NXT_NAME_SIZE];
+                  nret = nxt_get_name(nxt, dev, name, sizeof(name));
+                  if (nret != NXT_OK)
+                    continue;
+                  if (strcmp(match_name, name) != 0)
+                    continue;
+                }
               libusb_ref_device(dev);
               libusb_free_device_list(list, 1);
               nxt->dev = dev;

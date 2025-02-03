@@ -25,40 +25,20 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "error.h"
 #include "firmware.h"
 #include "lowlevel.h"
 #include "samba.h"
 
 static void
-fwflash(const char *fw_file)
+fwflash(const char *fw_file, const common_options_t *common_options)
 {
   nxt_t *nxt;
-  nxt_error_t err;
 
   NXT_HANDLE_ERR(nxt_init(&nxt), NULL, "Error during library initialization");
 
-  printf("Checking firmware... ");
   NXT_HANDLE_ERR(nxt_firmware_validate(fw_file), NULL, "Error");
-  printf("OK.\n");
 
-  err = nxt_find(nxt);
-  if (err)
-    {
-      if (err == NXT_NOT_PRESENT)
-        fprintf(stderr, "NXT not found. Is it properly plugged in via USB?\n");
-      else
-        NXT_HANDLE_ERR(err, nxt, "Error while scanning for NXT");
-      exit(1);
-    }
-
-  if (!nxt_is_firmware(nxt, SAMBA))
-    {
-      fprintf(stderr, "NXT found, but not running in reset mode.\n");
-      fprintf(stderr,
-              "Please reset your NXT manually and restart this program.\n");
-      exit(2);
-    }
+  common_find_bootloader(nxt, common_options);
 
   NXT_HANDLE_ERR(nxt_open(nxt), nxt, "Error while connecting to NXT");
   NXT_HANDLE_ERR(nxt_handshake(nxt), nxt, "Error during initial handshake");
@@ -80,7 +60,7 @@ static void
 usage(const char *progname, int exit_code)
 {
   fprintf(exit_code ? stderr : stdout,
-          "Usage: %s <firmware image to write>\n"
+          "Usage: %s [options] <firmware image to write>\n"
           "       %s (-l|-h)\n"
           "Flash firmware image to a connected NXT device.\n"
           "\n"
@@ -109,7 +89,7 @@ main(int argc, char *const *argv)
     usage(argv[0], 1);
   fw_file = argv[optind];
 
-  fwflash(fw_file);
+  fwflash(fw_file, &common_options);
 
   return 0;
 }

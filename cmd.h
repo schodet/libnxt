@@ -22,14 +22,13 @@
 #ifndef __CMD_H__
 #define __CMD_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "error.h"
 #include "lowlevel.h"
 
 #define NXT_NAME_SIZE 15
-
-typedef struct nxt_t nxt_t;
 
 /*
  * Using the same names as in the NXT firmware code, even if not consistent.
@@ -160,6 +159,7 @@ typedef struct
 } nxt_device_info_t;
 
 const char *nxt_cmd_str_error(nxt_cmd_status_t status);
+nxt_error_t nxt_cmd_boot(nxt_t *nxt, bool sure);
 nxt_error_t nxt_cmd_get_device_info(nxt_t *nxt, nxt_device_info_t *device_info);
 
 #endif /* __CMD_H__ */

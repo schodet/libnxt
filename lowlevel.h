@@ -46,7 +46,8 @@ typedef void (*nxt_list_cb_t)(void *user, const char *connection,
 nxt_error_t nxt_init(nxt_t **nxt);
 void nxt_exit(nxt_t *nxt);
 nxt_error_t nxt_list(nxt_t *nxt, nxt_list_cb_t cb, void *user);
-nxt_error_t nxt_find(nxt_t *nxt);
+nxt_error_t nxt_find(nxt_t *nxt, nxt_firmware match_fw,
+                     const char *match_serial, const char *match_name);
 nxt_error_t nxt_open(nxt_t *nxt);
 void nxt_close(nxt_t *nxt);
 int nxt_is_firmware(nxt_t *nxt, nxt_firmware fw);

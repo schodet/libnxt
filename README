@@ -72,8 +72,7 @@ When you have all that, build with:
     cd build
     meson compile
 
-Once you're done, you can try fwflash out by resetting your NXT (see
-bellow) and running:
+Once you're done, you can try fwflash out by running:
 
     ./fwflash firmware.bin
 
@@ -94,16 +93,20 @@ system logs that the NXT is detected. On linux, you can also check
 that the NXT is connected using lsusb. Make sure that the cable is
 good as it was reported that bad cable make the procedure fail.
 
-Then press and hold, for at least five seconds, the reset button which
-is hidden in the pin hole under the USB port. The brick should make a
-clicking noise and you can check in your operating system logs that
-the NXT is detected in SAM-BA mode, with a different identification.
-
 Then run fwflash:
 
     ./fwflash firmware.bin
 
 Where firmware.bin is the path to your firmware file.
+
+You will be prompted whether you accept to reset the NXT in bootloader
+mode, which erases the brick memory. To accept, type "RESET".
+
+You can also reset the NXT manually. To do this, press and hold, for
+at least five seconds, the reset button which is hidden in the pin
+hole under the USB port. The brick should make a clicking noise and
+you can check in your operating system logs that the NXT is detected
+in SAM-BA mode, with a different identification.
 
 If all goes well, fwflash should inform you that it has found the NXT
 on your USB device bus, and that flashing has started. After a few

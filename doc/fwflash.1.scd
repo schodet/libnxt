@@ -6,7 +6,7 @@ fwflash - flash firmware image to a connected NXT device
 
 # SYNOPSIS
 
-*fwflash* _file_
+*fwflash* [_options_]... _file_
 
 *fwflash* (*-l*|*-h*)
 
@@ -18,14 +18,21 @@ to send. This file usually has the .bin or .rfw extension and a size of
 262144 octets.
 
 Connect the NXT using a USB cable. Make sure it is detected by the computer
-when powered on. If you run *fwflash* now, it should report that the NXT is
-found, but not running in reset mode.
+when powered on.
+
+If you run *fwflash* now, it should report that the NXT is found, but not
+running in bootloader mode. *fwflash* can reset the NXT to bootloader for you.
 
 *The next step will erase the current firmware image!*
 
-Press and hold, for at least five seconds, the reset button which is hidden in
-the pin hole under the USB port. The brick should make a clicking noise and be
-detected by the computer in SAM-BA mode.
+If you answer "RESET", *fwflash* will erase the current firmware and will wait
+for the NXT to be detected in bootloader mode. The prompt can be skipped using
+the *-y* option.
+
+Another option is to reset the NXT manually. To do so, press and hold, for at
+least five seconds, the reset button which is hidden in the pin hole under the
+USB port. The brick should make a clicking noise and be detected by the computer
+in SAM-BA mode.
 
 You can then use *fwflash* to send the firmware. After a few seconds, it
 should announce successful flashing.
@@ -38,8 +45,19 @@ The *fwflash* utility is part of LibNXT.
 
 *-l*
 	List detected devices and exit.
+*-y*
+	Allow reset to bootloader mode without prompt (this erases the NXT
+	memory).
 *-h*
 	Show help message and exit.
+*-b*
+	Select device already in bootloader mode only, ignore other NXT devices.
+*-s* _SERIAL_
+	Select device with this serial (e.g. 00:16:53:01:02:03). This does not
+	work in bootloader mode, devices in bootloader mode are always selected.
+*-n* _NAME_
+	Select device with this name (e.g. NXT). This does not work in
+	bootloader mode, devices in bootloader mode are always selected.
 
 # SEE ALSO
 

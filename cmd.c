@@ -155,6 +155,29 @@ nxt_cmd_str_error(nxt_cmd_status_t status)
 }
 
 nxt_error_t
+nxt_cmd_boot(nxt_t *nxt, bool sure)
+{
+  static const uint8_t cmd[] = {
+    NXT_CMD_TYPE_SYSTEM, NXT_CMD_OPCODE_SYSTEM_BOOTCMD,
+    // clang-format off
+    'L', 'e', 't', '\'', 's', ' ', 'd', 'a', 'n', 'c', 'e', ':', ' ',
+    'S', 'A', 'M', 'B', 'A', '\0',
+    // clang-format on
+  };
+  uint8_t rsp[3 + sizeof("Yes")], *p;
+
+  assert(sure);
+
+  NXT_ERR(nxt_send_buf(nxt, cmd, sizeof(cmd)));
+  NXT_ERR(nxt_recv_buf(nxt, rsp, sizeof(rsp)));
+
+  p = rsp;
+  NXT_ERR(parse_reply(&p, NXT_CMD_OPCODE_SYSTEM_BOOTCMD));
+
+  return NXT_OK;
+}
+
+nxt_error_t
 nxt_cmd_get_device_info(nxt_t *nxt, nxt_device_info_t *device_info)
 {
   static const uint8_t cmd[] = { NXT_CMD_TYPE_SYSTEM,

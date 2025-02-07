@@ -61,7 +61,7 @@ list_cb(void *user, const char *connection, nxt_firmware fw, const char *serial,
 }
 
 static void
-common_list()
+common_list(void)
 {
   nxt_t *nxt;
   bool seen = false;

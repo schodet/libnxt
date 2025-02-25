@@ -1,7 +1,7 @@
 project('libnxt', 'c',
   default_options : 'warning_level=3',
   meson_version : '>=0.60.0',
-  version : '0.5.1')
+  version : '0.5.2')
 
 usbdep = dependency('libusb-1.0')
 

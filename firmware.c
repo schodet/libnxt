@@ -73,7 +73,7 @@ static nxt_error_t
 nxt_firmware_validate_fd(int fd)
 {
   struct stat s;
-  uint32_t vectors[6];
+  uint8_t vectors[6 * 4];
 
   if (fstat(fd, &s) < 0)
     return NXT_FILE_ERROR;
@@ -87,10 +87,12 @@ nxt_firmware_validate_fd(int fd)
   // Does it looks like ARM vectors?
   for (int i = 0; i < 6; i++)
     {
-      if (vectors[i] != 0xe1a00000                   // nop
-          && vectors[i] != 0xeafffffe                // branch here (-4)
-          && (vectors[i] & 0xffff0000) != 0xea000000 // branch forward
-          && (vectors[i] & 0xfffff000) != 0xe59ff000 // ldr pc, [pc, #xx]
+      uint32_t v = vectors[i * 4] | vectors[i * 4 + 1] << 8 |
+                   vectors[i * 4 + 2] << 16 | vectors[i * 4 + 3] << 24;
+      if (v != 0xe1a00000                   // nop
+          && v != 0xeafffffe                // branch here (-4)
+          && (v & 0xffff0000) != 0xea000000 // branch forward
+          && (v & 0xfffff000) != 0xe59ff000 // ldr pc, [pc, #xx]
       )
         return NXT_INVALID_FIRMWARE;
     }

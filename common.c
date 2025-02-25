@@ -40,7 +40,7 @@ handle_error(nxt_t *nxt, const char *msg, nxt_error_t err)
       nxt_close(nxt);
       nxt_exit(nxt);
     }
-  exit(err);
+  exit(1);
 }
 
 static void
